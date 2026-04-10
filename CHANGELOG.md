@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.7.0] - 2026-04-10
+
+### Changed
+
+- **重构为 Progressive Disclosure 架构** - SKILL.md 精简 + references/ 分离
+  - SKILL.md: 1368 行 → 235 行（触发时只加载核心内容）
+  - references/tokens.md: Spacing、Color、Radius、Typography、Elevation、Surfaces 完整定义
+  - references/components.md: 所有组件 Props 定义
+  - references/templates.md: 页面模板完整代码
+  - references/animation.md: 动画规则
+  - references/modes.md: 暗色模式
+  - references/focus.md: 焦点样式
+  - references/icons.md: 图标规则
+
+### Benefits
+
+- 触发速度更快（只加载 235 行）
+- Context window 更高效
+- 按需读取详细规则
+- 符合 skill-creator 最佳实践
+
+## [v1.6.0] - 2026-04-10
+
+### Added
+
+- **完整 Guidelines 内容嵌入** - 所有规则直接可用
+  - Animation: 时长 scale、缓动曲线、微交互模式、reduced motion
+  - Modes/Dark mode: 激活方式、Token 自动适配、不变的 Token
+  - Focus: 焦点环模式、品牌色背景上的焦点、自定义交互元素
+  - Icons: 尺寸规范、颜色继承、命名规则、Props
+  - 完整决策树: Spacing、Color、Radius、Typography、Elevation、Surfaces
+
+- **组件 Props 完整定义** - 所有核心组件的 Props 表格
+  - Button, IconButton, ButtonGroup
+  - InputField, TextareaField, SelectField, Checkbox, RadioGroup, SwitchField
+  - SidebarNavigation, SidebarButton, SecondaryNav, SecondaryNavItem
+  - Table, Pagination, Modal
+  - Badge, Toast, Tooltip, EmptyState, Skeleton
+  - Avatar, ItemCard, Breadcrumb, Toolbar
+  - ChatBubbles, PromptInput, PromptPane
+
+### Changed
+
+- 技能文件重新组织为 ~800 行精简版
+- 移除冗余的按需读取指引，改为直接嵌入
+- 强化视觉风格示例和对比
+
 ## [v1.5.0] - 2026-04-10
 
 ### Added

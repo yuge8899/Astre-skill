@@ -1,1050 +1,236 @@
 ---
 name: astra-ui
-description: "Astra UI设计系统工作流。创建符合Astra规范的页面、选择组件、验证合规性。触发词：astra page, astra component, astra layout, astra validate, 新建页面, 组件选择, 布局选择, 设置页面, 数据列表, dashboard"
+description: "Astra UI设计系统 - 极简专业B2C SaaS风格。创建页面、选择组件、验证合规性。触发词：创建页面、新建页面、设置页面、数据列表、dashboard、表单、按钮、输入框、导航、表格、弹窗、布局选择、组件选择、验证页面、astra"
 ---
 
 # Astra UI 设计系统
 
-Astra 是一个 B2C SaaS 产品的 UI 设计系统，风格：**极简、干净、透气**。
+B2C SaaS 产品设计系统，风格：**极简、干净、透气**。
 
-## 快速入口
-
-按任务类型直接进入：
-
-| 任务 | 执行流程 |
-|------|----------|
-| 新建页面 | 1.读规则 → 2.选模板 → 3.选组件 → 4.验证 |
-| 部分更新 | 1.读相关规则 → 2.改 → 3.验证 |
-| 组件选择 | 1.读组件规则 → 2.选择 → 3.验证（可选） |
-| 验证页面 | 1.读规则 → 2.检查 → 3.报告问题 |
-
----
-
-## 设计原则（强制）
-
-Astra 是专业 B2C SaaS 产品设计系统，风格：**极简、克制、专业**。
-
-### 核心风格
+## 设计原则
 
 | 原则 | 说明 |
 |------|------|
-| **极简配色** | 90% 中性色，品牌色仅用于主按钮和极少数高亮 |
-| **卡片式布局** | 内容区用 `surface-bg` 卡片，浮在 `brand-tertiary` 画布上 |
-| **无边框设计** | 用表面色对比分隔，不用边框线 |
-| **柔和阴影** | 仅用于浮动弹层（modal、dropdown），卡片不用阴影 |
-| **充足留白** | 卡片间距 `gap-xl`，内边距 `p-xl`，页面边距 `p-2xl` |
-| **整洁对齐** | 网格布局，一致的间距节奏 |
-
-### 颜色使用规则（严格遵守）
-
-```
-页面结构颜色分配：
-├── SidebarNavigation（60px）→ 深色背景，白色图标
-├── 主画布 → brand-tertiary（淡紫灰，提供品牌氛围）
-└── 内容卡片 → surface-bg（浅灰白，干净中性）
-
-品牌色使用（极度克制）：
-├── 主按钮背景 → brand-primary（仅主要 CTA）
-├── 激活状态 → brand-primary（导航选中、tab 选中）
-└── 禁止使用 → 卡片背景、大区块背景、装饰元素
-
-禁止事项：
-❌ 多种颜色混用
-❌ 彩色卡片背景
-❌ 渐变背景
-❌ 彩色边框
-❌ 强调色用于装饰
-```
-
-### 卡片设计规则
-
-```tsx
-// 正确：干净的卡片
-<div className="bg-surface-bg rounded-corner-lg p-xl">
-  {/* 内容 */}
-</div>
-
-// 错误：不要加边框、阴影
-<div className="bg-surface-bg rounded-corner-lg p-xl border border-gray-200 shadow-sm">
-  {/* 禁止！卡片不需要边框和阴影 */}
-</div>
-```
-
-**规则**：
-- 卡片背景：`surface-bg`（中性浅色）
-- 圆角：`rounded-corner-lg`（12px）
-- 内边距：`p-xl`（24px）
-- 无边框：不使用 `border`
-- 无阴影：不使用 `shadow`（阴影仅用于 modal、dropdown）
-
----
-
-## Design Tokens（设计令牌）
-
-### Spacing 间距
-
-Base-2 系统，4px 为标准单位。
-
-| Token | 值 | Tailwind | 用途 |
-|-------|-----|----------|------|
-| `space-xs` | 2px | `gap-xs`, `p-xs` | 最小间距 |
-| `space-sm` | 4px | `gap-sm`, `p-sm` | 紧凑间距 |
-| `space-md` | 8px | `gap-md`, `p-md` | 组件内间距 |
-| `space-lg` | 12px | `gap-lg`, `p-lg` | 表单字段间距 |
-| `space-xl` | 16px | `gap-xl`, `p-xl` | 卡片内边距、卡片间距 |
-| `space-2xl` | 24px | `gap-2xl`, `p-2xl` | 页面边距 |
-
-**常用场景**：
-```
-页面边距：p-2xl
-卡片内边距：p-xl
-卡片间距：gap-xl
-表单字段间距：gap-lg
-```
-
-### Color 颜色
-
-配色原则：~90% 中性表面，品牌色仅用于主操作。
-
-**主要 Token**：
-
-| Token | 值 | 用途 |
-|-------|-----|------|
-| `brand-primary` | `#2E62FF` | 主按钮、激活状态 |
-| `brand-tertiary` | `#EBF0FF` | 页面画布背景 |
-| `surface-bg` | `#ffffff` | 卡片、面板 |
-| `text-primary` | `rgba(0,0,0,0.85)` | 主要文字 |
-| `text-secondary` | `rgba(0,0,0,0.55)` | 次要文字 |
-| `border-primary` | `rgba(0,0,0,0.1)` | 边框 |
-
-**Tailwind 映射**：
-```css
-bg-brand-primary, bg-brand-tertiary
-bg-surface-bg
-text-text-primary, text-text-secondary
-border-border-primary
-```
-
-**背景选择**：
-```
-页面画布 → bg-brand-tertiary
-卡片/面板 → bg-surface-bg
-侧边导航 → bg-surface-bg + border-r border-border-primary
-凹陷区域 → bg-bg-faint
-```
-
-**文字选择**：
-```
-主要文字 → text-text-primary
-次要文字 → text-text-secondary
-辅助文字 → text-text-tertiary
-品牌色文字 → text-brand-primary
-在品牌色背景上 → text-on-brand
-```
-
-### Radius 圆角
-
-| Token | 值 | Tailwind | 用途 |
-|-------|-----|----------|------|
-| `corner-sm` | 4px | `rounded-corner-sm` | 小元素 |
-| `corner-md` | 6px | `rounded-corner-md` | 输入框、Badge |
-| `corner-lg` | 12px | `rounded-corner-lg` | 卡片、面板 |
-| `corner-full` | 999px | `rounded-corner-full` | 按钮（胶囊）、头像 |
-
-**组件映射**：
-```
-Button → corner-full
-InputField → corner-md
-内容卡片 → corner-lg
-Modal → corner-lg
-Badge → corner-md
-Avatar → corner-full
-```
-
-### Typography 排版
-
-字体：Instrument Sans
-
-| Class | 大小 | 重量 | 用途 |
-|-------|------|------|------|
-| `text-title` | 24px | 600 | 页面标题 |
-| `text-heading` | 20px | 500 | 区块标题 |
-| `text-label` | 16px | 500 | 表单标签、按钮文字 |
-| `text-label-sm` | 14px | 500 | 描述、辅助文字 |
-| `text-input` | 16px | 400 | 输入框内容 |
-
-**常用模式**：
-```tsx
-// 页面标题
-<h1 className="text-title text-text-primary">Profile</h1>
-<p className="text-label-sm text-text-secondary mt-xs">Manage settings</p>
-
-// 卡片区块标题
-<h2 className="text-label text-text-primary font-semibold mb-lg">Section</h2>
-```
-
-### Elevation 阴影
-
-原则：~95% 元素无阴影，用表面色对比区分。
-
-| 场景 | 阴影 |
-|------|------|
-| 卡片、面板、导航 | ❌ 无 |
-| 浮动工具栏 | ✅ 微阴影 |
-| Modal | ✅ 遮罩层 |
-| Dropdown | ✅ 微阴影 |
-
-### Surfaces 表面分层
-
-**分层策略**：
-```
-brand-tertiary        → 页面画布（品牌背景）
-surface-bg            → 卡片、面板（浮在画布上）
-surface-secondary-bg  → 二级导航面板
-bg-faint              → 卡片内凹陷区域
-input-bg              → 输入框背景
-```
-
-**分离原则**：
-- 内容卡片在画布上 → 表面色对比分隔，无边框
-- 侧边面板分隔 → `border-r border-border-primary`
-- 卡片堆叠 → `gap-xl` 间距
-
----
+| **极简配色** | 90% 中性色，品牌色仅用于主按钮和激活状态 |
+| **卡片式布局** | 内容用 `surface-bg` 卡片，浮在 `brand-tertiary` 画布上 |
+| **无边框设计** | 用表面色对比分隔，卡片无边框无阴影 |
+| **柔和阴影** | 仅用于浮动弹层（modal、dropdown、toolbar） |
 
 ## 硬规则（必须遵守）
 
-### 布局规则
+1. **每个桌面页面必须包含 `SidebarNavigation`**
+2. **页面背景永远是 `brand-tertiary`**
+3. **内容卡片使用 `surface-bg`**，无边框无阴影
+4. **间距使用 token**（`gap-xl`、`p-2xl`），禁止硬编码
+5. **禁止大面积使用 `brand-primary` 背景**，仅用于主按钮
+6. **每页最多一个 `primary` 按钮**
+7. **禁止彩色装饰**（渐变、彩色边框、彩色背景块）
+8. **使用设计系统组件**（`InputField` 不是 `<input>`）
+9. **图标来自 `lucide-react`**，禁止内联 SVG
+10. **导航层级严格**：`SidebarNavigation` → `SecondaryNav` → `Tabs`
+11. **Tabs 来自 Arco**（`@arco-design/web-react`）
+12. **卡片放在 `brand-tertiary` 画布上**，用表面色对比分隔
 
-1. **每个桌面页面必须包含 `SidebarNavigation`** — 60px 深色图标栏
-2. **页面背景永远是 `brand-tertiary`** — 淡紫灰，不是白色
-3. **内容卡片使用 `surface-bg`** — 浮在画布上
-4. **卡片无边框无阴影** — 表面色对比提供分隔
-5. **间距使用 token** — `gap-xl`、`p-2xl`，禁止硬编码像素
-
-### 颜色规则
-
-6. **禁止大面积使用 `brand-primary` 背景** — 仅用于主按钮
-7. **每页最多一个 `primary` 按钮** — 其他用 `neutral` 或 `subtle`
-8. **禁止彩色装饰** — 不用渐变、彩色边框、彩色背景块
-9. **图标始终中性色** — 不用品牌色图标
-
-### 组件规则
-
-10. **使用设计系统组件** — `InputField` 不是 `<input>`
-11. **图标来源**：`lucide-react` — 禁止内联 SVG
-12. **导航层级严格**：`SidebarNavigation` → `SecondaryNav` → `Tabs`，不可跳级
-
-### 依赖栈（三层）
-
-在任何组件选择前，预设依赖：
+## 依赖栈
 
 | 层级 | 来源 | 用途 |
 |------|------|------|
-| Layer 1 | `shadcn/ui` + `lucide-react` | 通用原语（按钮、输入、卡片、表格等） |
+| Layer 1 | `shadcn/ui` + `lucide-react` | 通用原语 |
 | Layer 2 | `@arco-design/web-react` `Tabs` | 区域内视图切换 |
 | Layer 3 | `@figma/astraui` `CurrencyExchange` | 外汇兑换流程 |
 
-### shadcn/ui 组件安装
-
-**一键安装全部组件**：
+**安装**：
 ```bash
-npx shadcn@latest add button card input textarea select checkbox switch radio-group label badge toast tooltip dialog sheet table pagination avatar dropdown-menu separator scroll-area skeleton tabs
-```
-
-**按类别安装**：
-
-| 类别 | 组件 | 安装命令 |
-|------|------|----------|
-| **布局** | card, separator, scroll-area | `npx shadcn@latest add card separator scroll-area` |
-| **按钮** | button | `npx shadcn@latest add button` |
-| **输入** | input, textarea, select, checkbox, switch, radio-group, label | `npx shadcn@latest add input textarea select checkbox switch radio-group label` |
-| **反馈** | badge, toast, tooltip, skeleton | `npx shadcn@latest add badge toast tooltip skeleton` |
-| **弹层** | dialog, sheet, dropdown-menu | `npx shadcn@latest add dialog sheet dropdown-menu` |
-| **数据** | table, pagination, avatar | `npx shadcn@latest add table pagination avatar` |
-| **导航** | tabs, breadcrumb | `npx shadcn@latest add tabs breadcrumb` |
-| **图表** | chart | `npx shadcn@latest add chart` |
-
-**图标库**：
-```bash
+npx shadcn@latest init
+npx shadcn@latest add button card input textarea select checkbox switch radio-group label badge toast tooltip dialog sheet table pagination avatar dropdown-menu separator scroll-area skeleton tabs breadcrumb chart
 npm install lucide-react
 ```
 
-**使用示例**：
-```tsx
-// 从 shadcn 导入组件
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { toast } from "@/components/ui/toast"
+## Token 速查
 
-// 从 lucide-react 导入图标
-import { Plus, Search, Settings, ChevronRight } from "lucide-react"
+### Spacing
+| 场景 | Token | Tailwind |
+|------|-------|----------|
+| 页面边距 | `space-2xl` | `p-2xl` |
+| 卡片内边距 | `space-xl` | `p-xl` |
+| 卡片间距 | `space-xl` | `gap-xl` |
+| 字段间距 | `space-lg` | `gap-lg` |
 
-// 使用
-<Button variant="primary">
-  <Plus className="size-4 mr-2" />
-  Add Item
-</Button>
-```
+### Color
+| 用途 | Token |
+|------|-------|
+| 页面画布 | `bg-brand-tertiary` |
+| 卡片/面板 | `bg-surface-bg` |
+| 主按钮 | `bg-brand-primary` + `text-on-brand` |
+| 主要文字 | `text-text-primary` |
+| 次要文字 | `text-text-secondary` |
 
-### 图表组件（shadcn/ui Chart）
+### Radius
+| 组件 | Token |
+|------|-------|
+| Button | `rounded-corner-full` |
+| Input | `rounded-corner-md` |
+| 卡片 | `rounded-corner-lg` |
 
-shadcn/ui 提供 Chart 组件，基于 Recharts 封装：
-
-| 图表类型 | 用途 |
-|----------|------|
-| Area Chart | 面积图，趋势展示 |
-| Bar Chart | 柱状图，对比分析 |
-| Line Chart | 折线图，趋势变化 |
-| Pie Chart | 饼图，占比分布 |
-| Radar Chart | 雷达图，多维对比 |
-| Radial Chart | 环形图，进度/占比 |
-
-**安装**：
-```bash
-npx shadcn@latest add chart
-```
-
-**图表配色规则（遵循 Astra 极简风格）**：
-- 主数据：`brand-primary` (#2E62FF)
-- 对比数据：中性灰 (#a3a3a3)
-- 网格线：淡灰 (#e5e5e5)
-- 禁止彩虹色、渐变填充、3D 效果
-- 图表放在 `surface-bg` 卡片内
-
-**示例用法**：
-```tsx
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
-
-<div className="bg-surface-bg rounded-corner-lg p-xl">
-  <h2 className="font-semibold text-text-primary mb-lg">Revenue Trend</h2>
-  <ChartContainer config={chartConfig} className="h-[300px]">
-    <BarChart data={data}>
-      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-      <XAxis dataKey="month" stroke="#737373" fontSize={12} />
-      <YAxis stroke="#737373" fontSize={12} />
-      <ChartTooltip content={<ChartTooltipContent />} />
-      <Bar dataKey="value" fill="#2E62FF" radius={[4, 4, 0, 0]} />
-    </BarChart>
-  </ChartContainer>
-</div>
-```
-
-**chartConfig 配色配置**：
-```tsx
-const chartConfig = {
-  value: {
-    label: "Value",
-    color: "#2E62FF", // brand-primary
-  },
-  previous: {
-    label: "Previous",
-    color: "#a3a3a3", // 中性灰
-  },
-}
-```
+### Typography
+| 用途 | Class |
+|------|-------|
+| 页面标题 | `text-title` |
+| 区块标题 | `text-heading` 或 `text-label font-semibold` |
+| 描述文字 | `text-label-sm` |
 
 ---
 
-## 页面模板（4 个标准模板）
-
-### Template 1: Dashboard
-
-**目标**：概览 — 查看当前状态、最近活动、待处理操作
-
-```tsx
-<div className="flex h-screen overflow-hidden">
-  <SidebarNavigation>{/* nav items */}</SidebarNavigation>
-
-  <main className="flex-1 bg-brand-tertiary overflow-y-auto p-2xl">
-    {/* Page header */}
-    <div className="flex items-center justify-between mb-xl">
-      <h1 className="text-text-primary text-xl font-semibold">Dashboard</h1>
-      <Button variant="primary">New Item</Button>
-    </div>
-
-    {/* Summary cards row */}
-    <div className="grid grid-cols-3 gap-xl mb-xl">
-      <SummaryCard />
-      <SummaryCard />
-      <SummaryCard />
-    </div>
-
-    {/* 2-column section row */}
-    <div className="grid grid-cols-2 gap-xl">
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        {/* Recent activity */}
-      </div>
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        {/* Pending actions */}
-      </div>
-    </div>
-  </main>
-</div>
-```
-
-**规则**：
-- 最多 4 个摘要卡片（标准是 3 个）
-- 每个卡片：`bg-surface-bg rounded-corner-lg p-xl`
-- 无边框 — 表面对比分隔
-
----
-
-### Template 1.5: Analytics Dashboard（数据分析）
-
-**目标**：数据概览 — 统计指标、趋势图表、对比分析、数据表格
-
-```tsx
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid } from "recharts"
-
-const chartConfig = {
-  value: { label: "Value", color: "#2E62FF" },
-  previous: { label: "Previous", color: "#a3a3a3" },
-}
-
-<div className="flex h-screen overflow-hidden">
-  <SidebarNavigation>{/* nav items */}</SidebarNavigation>
-
-  <main className="flex-1 bg-brand-tertiary overflow-y-auto p-2xl">
-    {/* Page header */}
-    <div className="flex items-center justify-between mb-xl">
-      <h1 className="text-text-primary text-xl font-semibold">Analytics</h1>
-      <Button variant="neutral">Export</Button>
-    </div>
-
-    {/* Top stats row */}
-    <div className="grid grid-cols-4 gap-xl mb-xl">
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <p className="text-text-secondary text-sm mb-xs">Total Revenue</p>
-        <p className="text-text-primary text-2xl font-semibold">$24,580</p>
-        <p className="text-text-positive text-sm mt-xs">+12.5%</p>
-      </div>
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <p className="text-text-secondary text-sm mb-xs">Active Users</p>
-        <p className="text-text-primary text-2xl font-semibold">1,234</p>
-        <p className="text-text-positive text-sm mt-xs">+8.2%</p>
-      </div>
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <p className="text-text-secondary text-sm mb-xs">Conversion</p>
-        <p className="text-text-primary text-2xl font-semibold">3.2%</p>
-        <p className="text-text-negative text-sm mt-xs">-0.4%</p>
-      </div>
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <p className="text-text-secondary text-sm mb-xs">Avg. Order</p>
-        <p className="text-text-primary text-2xl font-semibold">$89</p>
-        <p className="text-text-positive text-sm mt-xs">+5.1%</p>
-      </div>
-    </div>
-
-    {/* Charts row */}
-    <div className="grid grid-cols-2 gap-xl mb-xl">
-      {/* Line chart card */}
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <h2 className="text-text-primary font-semibold mb-lg">Revenue Trend</h2>
-        <ChartContainer config={chartConfig} className="h-[300px]">
-          <LineChart data={trendData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-            <XAxis dataKey="month" stroke="#737373" fontSize={12} />
-            <YAxis stroke="#737373" fontSize={12} />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Line type="monotone" dataKey="value" stroke="#2E62FF" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ChartContainer>
-      </div>
-
-      {/* Bar chart card */}
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <h2 className="text-text-primary font-semibold mb-lg">Comparison</h2>
-        <ChartContainer config={chartConfig} className="h-[300px]">
-          <BarChart data={comparisonData}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-            <XAxis dataKey="category" stroke="#737373" fontSize={12} />
-            <YAxis stroke="#737373" fontSize={12} />
-            <ChartTooltip content={<ChartTooltipContent />} />
-            <Bar dataKey="value" fill="#2E62FF" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="previous" fill="#a3a3a3" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ChartContainer>
-      </div>
-    </div>
-
-    {/* Data table card */}
-    <div className="bg-surface-bg rounded-corner-lg p-xl">
-      <h2 className="text-text-primary font-semibold mb-lg">Recent Transactions</h2>
-      <Table columns={columns} data={tableData} />
-    </div>
-  </main>
-</div>
-```
-
-**规则**：
-- 顶部统计卡片 4 个，展示关键指标
-- 图表放在独立卡片内，卡片高度固定
-- 图表配色：主数据用 `brand-primary`，对比数据用中性灰
-- 图表网格线用淡灰色 `#e5e5e5`
-- 数据表格放在底部卡片内
-
----
-
-### Template 2: Data List / Management
-
-**目标**：浏览、搜索、过滤、操作数据集
-
-```tsx
-<div className="flex h-screen overflow-hidden">
-  <SidebarNavigation>{/* nav items */}</SidebarNavigation>
-
-  <main className="flex-1 bg-brand-tertiary overflow-y-auto p-2xl">
-    <div className="flex items-center justify-between mb-xl">
-      <h1 className="text-text-primary text-xl font-semibold">Records</h1>
-      <Button variant="primary">New Record</Button>
-    </div>
-
-    <div className="bg-surface-bg rounded-corner-lg p-xl">
-      {/* Filter Bar */}
-      <FilterBar fields={filterFields} onSearch={handleSearch} />
-
-      <div className="border-t border-border-secondary my-md" />
-
-      {/* Table */}
-      <Table columns={columns} data={data} rowKey="id" />
-
-      {/* Pagination */}
-      <div className="border-t border-border-secondary pt-md mt-sm">
-        <Pagination total={total} current={page} pageSize={pageSize} />
-      </div>
-    </div>
-  </main>
-</div>
-```
-
-**规则**：
-- 过滤栏、表格、分页在**同一卡片**内
-- 过滤栏 >4 字段时折叠
-- 分页必须存在
-- 行选择启用批量操作栏
-
----
-
-### Template 3: Detail / Editor
-
-**目标**：查看或编辑单个复杂实体
-
-```tsx
-<div className="flex h-screen overflow-hidden">
-  <SidebarNavigation>{/* nav items */}</SidebarNavigation>
-
-  <main className="flex-1 bg-brand-tertiary overflow-hidden flex flex-col">
-    {/* Breadcrumb + header */}
-    <div className="p-2xl pb-0">
-      <Breadcrumb items={breadcrumbItems} />
-      <div className="flex items-center justify-between mt-sm mb-xl">
-        <h1 className="text-text-primary text-xl font-semibold">{title}</h1>
-        <div className="flex gap-sm">
-          <Button variant="neutral">Cancel</Button>
-          <Button variant="primary">Save</Button>
-        </div>
-      </div>
-    </div>
-
-    {/* 3-column content */}
-    <div className="flex flex-1 overflow-hidden gap-xl px-2xl pb-2xl">
-      <div className="w-[240px] flex-shrink-0 bg-surface-bg rounded-corner-lg overflow-y-auto">
-        {/* Entity list */}
-      </div>
-
-      <div className="flex-1 bg-surface-bg rounded-corner-lg overflow-y-auto p-xl">
-        {/* Main editor */}
-      </div>
-
-      <div className="w-[280px] flex-shrink-0 bg-surface-bg rounded-corner-lg overflow-y-auto p-xl">
-        {/* Properties panel */}
-      </div>
-    </div>
-  </main>
-</div>
-```
-
-**规则**：
-- 始终显示 Breadcrumb
-- 左面板：固定 240px — 实体导航
-- 中间：`flex-1` — 主编辑区
-- 右面板：固定 280px — 属性/元数据
-- 三个面板都是 `bg-surface-bg` 卡片
-
----
-
-### Template 4: Form / Settings
-
-**目标**：配置偏好、填写结构化表单、管理设置
-
-```tsx
-<div className="flex h-screen overflow-hidden">
-  <SidebarNavigation>{/* nav items */}</SidebarNavigation>
-
-  <SecondaryNav>
-    <SecondaryNavItem icon={<User />} label="Profile" />
-    <SecondaryNavItem icon={<Shield />} label="Security" active />
-    <SecondaryNavItem icon={<CreditCard />} label="Billing" />
-  </SecondaryNav>
-
-  <main className="flex-1 bg-brand-tertiary overflow-y-auto p-2xl">
-    <h1 className="text-text-primary text-xl font-semibold mb-xl">Security</h1>
-
-    <div className="max-w-3xl flex flex-col gap-xl">
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <h2 className="text-text-primary font-semibold mb-lg">Password</h2>
-        <InputField label="Current password" type="password" />
-        <InputField label="New password" type="password" />
-        <div className="flex justify-end gap-sm mt-lg">
-          <Button variant="neutral">Cancel</Button>
-          <Button variant="primary">Update</Button>
-        </div>
-      </div>
-    </div>
-  </main>
-</div>
-```
-
-**规则**：
-- Settings 必须用 `SecondaryNav`，不用 Tabs
-- 表单最大宽度：`max-w-3xl`（768px）
-- 每个逻辑区块 = 独立 `bg-surface-bg` 卡片
-- 每个卡片底部有 Save 按钮
-
----
-
-## Layout 决策树
+## 模板选择
 
 ```
-页面类型判断
+┌─ "Which template?"
 │
-├─ 表单/设置/账户/偏好页面？
-│  └─ Form / Settings Layout
-│     → 有子区块？加 SecondaryNav
-│     → 无子区块？仅 SidebarNavigation
-│
-├─ Dashboard/库/画廊/重复内容页面？
-│  └─ Content / Dashboard Layout
-│     → 重复卡片？用 grid
-│     → 需侧边详情面板？用 split layout
-│
-├─ 有稳定子区块的页面？
-│  └─ Sub-section Layout
-│     → 页面级持久子区块？SecondaryNav
-│     → 仅区域内切换？Tabs（在内容区域内）
-│
-├─ 编辑器/画布/工具密集型？
-│  └─ Editor Layout
-│     → 浮动上下文工具？Toolbar
-│     → 持久二级结构？侧面板或 SecondaryNav
-│
-├─ Chat/AI 交互？
-│  └─ Chat / AI Layout
-│     → 新建 AI 流程？AIVideoCreation 入口
-│     → 持续对话？PromptPane 布局
-│
-└─ 空状态或低数据？
-   └─ Empty State Layout
-      → 整页空？居中页面级空状态
-      → 区域空？区域内空状态
+├─ 查看当前状态 + 最近活动？→ Dashboard
+├─ 浏览、搜索、管理记录？→ Data List
+├─ 查看或编辑单个实体？→ Detail / Editor
+└─ 配置设置 / 填写表单？→ Form / Settings
 ```
 
-### SecondaryNav vs Tabs
-
-```
-需要二级导航？
-│
-├─ 页面级持久子区块？
-│  └─ SecondaryNav
-│
-└─ 仅一个内容区域内的视图切换？
-   └─ Tabs（Layer 2 Arco Tabs）
-```
+详见 [templates.md](references/templates.md)
 
 ---
 
 ## Component 决策树
 
 ### Actions
-
 ```
-触发操作
-│
-├─ 文字标签操作？
-│  └─ Button
-│     ├─ 主操作（每区块一个）→ variant="primary"
-│     ├─ 辅助操作 → variant="neutral"
-│     └─ 低强调操作 → variant="subtle"
-│
-├─ 纯图标操作？
-│  └─ IconButton
-│
-├─ 多个相关操作分组？
-│  └─ ButtonGroup
-│
-└─ 收藏/星标切换？
-   └─ FavoriteButton
+├─ 文字标签操作？→ Button
+│  ├─ 主 CTA → variant="primary"
+│  ├─ 辅助操作 → variant="neutral"
+│  └─ 低强调 → variant="subtle"
+├─ 纯图标操作？→ IconButton
+├─ 多个相关操作？→ ButtonGroup
+└─ 收藏/星标？→ FavoriteButton
 ```
-
-**Button 图标规则**：
-- 使用 `iconStart` 或 `iconEnd`
-- 图标尺寸：`size={16}`
-- 禁止自定义 prop 如 `leftIcon`
 
 ### Inputs
-
 ```
-数据输入
-│
-├─ 货币对/外汇报价/汇率转换？
-│  └─ CurrencyExchange（需 Layer 3 预设）
-│
-├─ 短文本？
-│  └─ InputField
-│
-├─ 长文本？
-│  └─ TextareaField
-│
-├─ 从预定义选项选择？
-│  └─ SelectField
-│
-├─ 互斥选项？
-│  └─ RadioGroup
-│
-├─ 带标签的布尔设置？
-│  └─ SwitchField
-│
-├─ 表单布尔字段？
-│  └─ Checkbox
-│
-└─ 搜索行为？
-   └─ SearchComponent
+├─ 短文本？→ InputField
+├─ 长文本？→ TextareaField
+├─ 预定义选项？→ SelectField
+├─ 互斥选项？→ RadioGroup
+├─ 带标签布尔设置？→ SwitchField
+├─ 表单布尔字段？→ Checkbox
+└─ 搜索？→ SearchComponent
 ```
 
 ### Navigation
-
 ```
-导航层级
-│
-├─ 应用级页面导航？
-│  └─ SidebarNavigation + SidebarButton
-│     图标：className="size-full", strokeWidth={1.5}
-│
-├─ 页面子区块？
-│  └─ SecondaryNav + SecondaryNavItem
-│     图标：className="size-full", strokeWidth={1.5}
-│
-└─ 区域内视图切换？
-   └─ Tabs（Layer 2 Arco Tabs）
+├─ 应用级页面导航？→ SidebarNavigation
+├─ 页面子区块？→ SecondaryNav
+└─ 区域内视图切换？→ Tabs (Arco)
 ```
-
-**重要**：禁止用 Tabs 替代 SecondaryNav
 
 ### Feedback
-
 ```
-反馈类型
-│
-├─ 短暂非阻塞通知？
-│  └─ Toast
-│
-├─ 状态标签或计数？
-│  └─ Badge（使用 label prop）
-│
-├─ 悬停/聚焦提示？
-│  └─ Tooltip
-│
-└─ 阻塞决策或任务？
-   └─ Modal
+├─ 短暂非阻塞通知？→ Toast
+├─ 状态标签？→ Badge
+├─ 悬停提示？→ Tooltip
+└─ 阻塞决策？→ Modal
 ```
 
 ### Media
-
 ```
-媒体/身份
-│
-├─ 头像/实体图像？
-│  └─ Avatar
-│     有图 → type="image"
-│     无图 → type="initial"
-│
-├─ 多人/多实体？
-│  └─ AvatarGroup
-│
-├─ 内容卡片？
-│  └─ ItemCard
-│
-├─ 视频时长标签？
-│  └─ DurationBadge
-│
-└─ 视频播放控制？
-   └─ VideoControl
+├─ 头像？→ Avatar
+├─ 内容卡片？→ ItemCard
+├─ 视频时长？→ DurationBadge
+└─ 视频控制？→ VideoControl
 ```
 
-### Chat / AI
+**所有组件 Props**：详见 [components.md](references/components.md)
+
+---
+
+## Layout 决策树
 
 ```
-Chat/AI 场景
-│
-├─ 新建 AI 创作流程？
-│  └─ AIVideoCreation
-│
-├─ 持续对话界面？
-│  └─ PromptPane
-│
-├─ 单条消息气泡？
-│  └─ ChatBubbles
-│     AI → type="ai"
-│     用户 → type="user" + userAvatar
-│
-└─ 独立提示输入？
-   └─ PromptInput
+├─ 表单/设置页面？→ Form Layout + SecondaryNav
+├─ Dashboard/画廊？→ Dashboard Layout + grid
+├─ 有稳定子区块？
+│  ├─ 页面级持久？→ SecondaryNav
+│  └─ 仅区域内切换？→ Tabs
+├─ 编辑器/工具密集型？→ Editor Layout + Toolbar
+└─ Chat/AI？→ PromptPane
 ```
+
+**SecondaryNav vs Tabs**：
+- 页面级持久子区块 → SecondaryNav
+- 仅一个内容区域内的视图切换 → Tabs
 
 ---
 
 ## 验证 Checklist
 
-### Critical（必须通过）
-
-**布局结构**
+### Critical
 - [ ] 桌面页面包含 `SidebarNavigation`
-- [ ] 主内容画布使用 `bg-brand-tertiary`
-- [ ] 卡片使用 `bg-surface-bg`
-- [ ] 卡片无 `border`、无 `shadow`（仅 modal/dropdown 可用阴影）
-
-**颜色使用**
-- [ ] 无彩色卡片背景
-- [ ] 无渐变背景
-- [ ] `brand-primary` 仅用于主按钮和激活状态
+- [ ] 主画布 `bg-brand-tertiary`
+- [ ] 卡片 `bg-surface-bg`，无边框无阴影
+- [ ] 无彩色卡片背景、无渐变
+- [ ] `brand-primary` 仅用于主按钮
 - [ ] 每页最多一个 `primary` Button
-
-**组件合法**
-- [ ] Button 变体合法：`primary` | `neutral` | `subtle`
-- [ ] 导航层级正确，无跳级
 - [ ] 图标来自 `lucide-react`
+- [ ] Button 变体合法（`primary`/`neutral`/`subtle`）
 
 ### Major
-
-- [ ] 正确的导航层级选择
-- [ ] 依赖已预设（Layer 1/2/3）
-- [ ] 内容分组合理
-- [ ] 组件 API 使用正确
-- [ ] Token 使用正确（间距、颜色、圆角）
-- [ ] 无多余装饰元素
-- [ ] 图表使用 recharts，配色克制（主数据用品牌色，其他用中性灰）
-- [ ] 图表网格线淡灰色，无 3D 效果
+- [ ] 导航层级正确
+- [ ] Token 使用正确
+- [ ] 组件 API 正确
 
 ### Minor
-
 - [ ] 图标尺寸一致
-- [ ] 层级和间距节奏
-- [ ] Badge/Tooltip 使用合理
-
-### 修复顺序
-
-1. 缺少必读规则或错误假设
-2. 页面结构和导航错误
-3. 非法组件或变体
-4. 图标使用错误
-5. Token、间距、层级问题
+- [ ] 间距节奏合理
 
 ---
 
-## 执行流程
+## References 导航
 
-### 新建页面
+按需读取详细规则：
 
-```
-1. 确定页面类型 → 选择模板
-2. 选择布局 → SidebarNavigation + (SecondaryNav?)
-3. 预设依赖 → Layer 1 (必须)
-4. 选择组件 → 按决策树
-5. 验证 → Checklist
-```
-
-### 部分更新
-
-```
-1. 识别变更范围
-2. 仅读取相关规则
-3. 结构变更？→ Layout 决策树
-4. 组件变更？→ Component 决策树
-5. 验证
-```
-
-### 组件选择
-
-```
-1. 识别 UI 需求类型
-2. 预设依赖（如需 Layer 2/3）
-3. 按决策树选择
-4. 确认变体和图标模式
-```
-
-### 验证
-
-```
-1. 检查 Critical 项
-2. 检查 Major 项
-3. 检查 Minor 项
-4. 输出问题列表和修复建议
-```
-
----
-
-## 组件目录速查
-
-| 类别 | 组件 | 用途 |
-|------|------|------|
-| **按钮** | Button, IconButton, ButtonGroup, FavoriteButton | 操作触发 |
-| **输入** | InputField, TextareaField, SelectField, SearchComponent, Checkbox, RadioGroup, SwitchField, CurrencyExchange | 数据输入 |
-| **导航** | SidebarNavigation, SidebarButton, SecondaryNav, SecondaryNavItem, Tabs, SegmentedControl | 页面/区块切换 |
-| **媒体** | Avatar, AvatarGroup, ItemCard, DurationBadge, VideoControl | 内容展示 |
-| **反馈** | Toast, Badge, Tooltip, Modal, EmptyState, Skeleton | 状态/通知 |
-| **Chat** | PromptPane, ChatBubbles, PromptInput, AIVideoCreation | AI 交互 |
-| **数据** | Table, Pagination, Breadcrumb | 数据展示 |
-| **图表** | LineChart, BarChart, PieChart (recharts) | 数据可视化 |
-| **工具** | Toolbar, ToolbarItem | 上下文工具 |
+| 需求 | 文件 |
+|------|------|
+| Spacing/Color/Radius/Typography/Elevation/Surfaces 完整定义和决策树 | [tokens.md](references/tokens.md) |
+| 动画时长、缓动曲线、微交互模式 | [animation.md](references/animation.md) |
+| 暗色模式激活和 Token 适配 | [modes.md](references/modes.md) |
+| 焦点环样式规则 | [focus.md](references/focus.md) |
+| 图标尺寸、颜色、命名规则 | [icons.md](references/icons.md) |
+| 所有组件 Props 定义 | [components.md](references/components.md) |
+| 页面模板完整代码 | [templates.md](references/templates.md) |
 
 ---
 
 ## 视觉风格示例
 
-### ✅ 正确的极简风格
-
+### ✅ 正确
 ```tsx
-// 干净的页面结构
 <div className="flex h-screen">
   <SidebarNavigation>{/* ... */}</SidebarNavigation>
-
   <main className="flex-1 bg-brand-tertiary p-2xl">
-    {/* 页面标题 */}
     <h1 className="text-xl font-semibold text-text-primary mb-xl">Settings</h1>
-
-    {/* 卡片组 */}
     <div className="max-w-3xl flex flex-col gap-xl">
-      {/* 干净的卡片：无边框、无阴影 */}
       <div className="bg-surface-bg rounded-corner-lg p-xl">
         <h2 className="font-semibold text-text-primary mb-lg">Profile</h2>
         <InputField label="Name" />
-        <InputField label="Email" />
         <div className="flex justify-end mt-lg">
           <Button variant="primary">Save</Button>
         </div>
       </div>
-
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        <h2 className="font-semibold text-text-primary mb-lg">Notifications</h2>
-        <SwitchField label="Email notifications" />
-      </div>
     </div>
   </main>
 </div>
 ```
 
-### ❌ 错误的花哨风格
-
+### ❌ 错误
 ```tsx
-// 禁止：多种颜色、边框、阴影、渐变
-<div className="flex h-screen">
-  <SidebarNavigation>{/* ... */}</SidebarNavigation>
-
-  <main className="flex-1 bg-gradient-to-br from-purple-50 to-blue-50 p-6">
-    {/* 禁止：彩色卡片 */}
-    <div className="bg-white rounded-xl p-6 border-2 border-purple-200 shadow-lg">
-      {/* 禁止：多种颜色混用 */}
-      <h2 className="text-purple-600 font-bold mb-4">Profile</h2>
-
-      {/* 禁止：彩色边框输入框 */}
-      <div className="border-2 border-blue-300 rounded-lg p-2">
-        <input className="text-gray-700" />
-      </div>
-
-      {/* 禁止：多个 primary 按钮 */}
-      <div className="flex gap-2 mt-4">
-        <Button variant="primary">Save</Button>
-        <Button variant="primary">Cancel</Button> {/* 错误！ */}
-      </div>
-    </div>
-
-    {/* 禁止：渐变背景卡片 */}
-    <div className="bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl p-6">
-      {/* 禁止：彩色装饰 */}
-    </div>
-  </main>
-</div>
+// 禁止：彩色、边框、阴影、渐变
+<main className="bg-gradient-to-br from-purple-50 to-blue-50">
+  <div className="bg-white rounded-xl p-6 border-2 border-purple-200 shadow-lg">
+    {/* ... */}
+  </div>
+</main>
 ```
-
-### 风格对比总结
-
-| 元素 | ✅ 正确 | ❌ 错误 |
-|------|--------|--------|
-| 页面背景 | `bg-brand-tertiary`（淡紫灰） | 白色、渐变、彩色 |
-| 卡片背景 | `bg-surface-bg`（中性灰白） | 彩色、渐变、带边框 |
-| 卡片样式 | 无边框、无阴影 | `border`、`shadow` |
-| 品牌色 | 仅主按钮、激活状态 | 卡片背景、装饰元素 |
-| Primary 按钮 | 每页最多 1 个 | 多个 primary 按钮 |
-| 装饰元素 | 无 | 彩色块、渐变、彩色边框 |
-
----
-
-## 按需读取 Guidelines
-
-当需要更详细的规则时，按需读取以下文件：
-
-### Foundations 基础 Token
-
-| 需求 | 读取文件 |
-|------|----------|
-| 完整间距规则 + 决策树 | `guidelines/foundations/spacing.md` |
-| 完整颜色规则 + 决策树 | `guidelines/foundations/color.md` |
-| 完整圆角规则 + 组件映射 | `guidelines/foundations/radius.md` |
-| 完整排版规则 | `guidelines/foundations/typography.md` |
-| 阴影使用规则 | `guidelines/foundations/elevation.md` |
-| 表面分层规则 | `guidelines/foundations/surfaces.md` |
-| 动画时长 + 缓动曲线 | `guidelines/foundations/animation.md` |
-| 暗色模式 | `guidelines/foundations/modes.md` |
-| 焦点环规则 | `guidelines/foundations/focus.md` |
-
-### Components 组件详细
-
-| 组件 | 读取文件 | 包含内容 |
-|------|----------|----------|
-| Button | `guidelines/components/button.md` | Props、变体、示例 |
-| Input | `guidelines/components/input.md` | 所有输入组件 Props |
-| Navigation | `guidelines/components/navigation.md` | 导航层级 Props |
-| Table | `guidelines/components/table.md` | 表格用法 |
-| Modal | `guidelines/components/modal.md` | 弹层用法 |
-| Feedback | `guidelines/components/feedback.md` | Toast/Badge/Tooltip |
-| Media | `guidelines/components/media.md` | Avatar/ItemCard |
-| Tabs | `guidelines/components/tabs.md` | Tabs/SegmentedControl |
-| Chat | `guidelines/components/chat.md` | 聊天组件 |
-| PromptChat | `guidelines/components/promptchat.md` | AI 交互组件 |
-| Toolbar | `guidelines/components/toolbar.md` | 工具栏 |
-| Pagination | `guidelines/components/pagination.md` | 分页 |
-| EmptyState | `guidelines/components/empty-state.md` | 空状态 |
-| Skeleton | `guidelines/components/skeleton.md` | 骨架屏 |
-| Breadcrumb | `guidelines/components/breadcrumb.md` | 面包屑 |
-
-### Composition 布局组合
-
-| 需求 | 读取文件 |
-|------|----------|
-| 页面布局模式 | `guidelines/composition/layouts.md` |
-| 页面模板 | `guidelines/composition/page-templates.md` |
-| 视觉层级 | `guidelines/composition/hierarchy.md` |
-| 密度控制 | `guidelines/composition/density.md` |
-
-### 其他
-
-| 需求 | 读取文件 |
-|------|----------|
-| 图标查找 | `guidelines/icon-discovery.md` |
-| 依赖配置 | `guidelines/setup.md` |
-| 系统概览 | `guidelines/overview.md` |
