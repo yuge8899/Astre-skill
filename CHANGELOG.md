@@ -2,6 +2,45 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.8.0] - 2026-04-10
+
+### Added
+
+- **shadcn/ui 集成** - 完整的组件映射和使用示例
+  - 17 个常用组件的导入路径
+  - Astra 变体与 shadcn variant 对应关系
+  - Button、Input、Dialog、Table 等完整示例
+
+- **page-agent 自动化测试** - 自然语言控制网页
+  - 安装和配置指南
+  - 导航规范验证示例
+  - 按钮布局验证
+  - 表格和表单验证
+  - MCP Server 集成
+
+- **示例页面**
+  - order-list-page.tsx: React 订单列表组件
+  - order-list-preview.html: HTML 预览页面
+
+### Changed
+
+- **图标规范更新**
+  - 必须使用 lucide.dev 图标（硬规则）
+  - strokeWidth={1.5} 用于导航图标
+  - 使用前必须验证图标名称
+
+- **颜色系统迁移**
+  - Tailwind CSS v4.1.6
+  - Blue 作为品牌主色
+  - Slate 作为中性色
+  - Blue-700 作为主题色
+
+### Benefits
+
+- shadcn/ui 提供可控的组件源码
+- page-agent 支持自然语言自动化测试
+- 图标规范更严格，避免混用
+
 ## [v1.7.1] - 2026-04-10
 
 ### Added
