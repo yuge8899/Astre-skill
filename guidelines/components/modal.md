@@ -1,0 +1,109 @@
+# Modal
+
+Runtime note:
+This is the semantic Astra modal contract.
+Use the runtime source defined in `guidelines/setup.md` before choosing a concrete library import.
+
+## When to use
+
+Use Modal for focused tasks that require user attention or input — confirmations, export settings, sharing, and forms. Modals steal focus and block interaction with the background.
+
+```
+┌─ "Should I use a Modal?"
+│
+├─ User must make a decision before continuing?
+│  └─ Yes — Modal (confirmation dialog)
+│
+├─ Focused task with its own form fields?
+│  └─ Yes — Modal (settings, export, share)
+│
+├─ Brief notification or confirmation?
+│  └─ No — use Toast instead
+│
+└─ Contextual info on hover?
+   └─ No — use Tooltip instead
+```
+
+## Props
+
+| Prop | Type | Default |
+|---|---|---|
+| `isOpen` | `boolean` | required |
+| `onClose` | `() => void` | required |
+| `title` | `string` | — |
+| `children` | `ReactNode` | required |
+| `footer` | `ReactNode` | — |
+| `size` | `'small' \| 'medium' \| 'large'` | `'medium'` |
+| `className` | `string` | — |
+
+## Sizing
+
+| Size | Width | Use for |
+|---|---|---|
+| `small` | 360px | Simple confirmations, alerts |
+| `medium` | 480px | **Default** — forms, settings, export |
+| `large` | 640px | Complex forms, multi-step flows |
+
+## Usage notes
+
+- Closes on Escape key and backdrop click
+- Locks body scroll while open
+- Uses `role="dialog"` and `aria-modal` for accessibility
+- The modal handles its own `modal-scrim` backdrop — do not manually add a backdrop
+- `footer` is optional — use it for action buttons
+
+## Example
+
+```tsx
+import { Modal, Button, InputField, SelectField } from '@figma/astraui'
+
+function ExportModal({ open, onClose }) {
+  return (
+    <Modal
+      isOpen={open}
+      onClose={onClose}
+      title="Export settings"
+      size="medium"
+      footer={
+        <>
+          <Button variant="neutral" onClick={onClose}>Cancel</Button>
+          <Button variant="primary">Export</Button>
+        </>
+      }
+    >
+      <div className="flex flex-col gap-lg">
+        <InputField label="File name" value="my-video" />
+        <SelectField
+          label="Format"
+          options={[
+            { value: 'mp4', label: 'MP4' },
+            { value: 'mov', label: 'MOV' },
+            { value: 'webm', label: 'WebM' },
+          ]}
+          value="mp4"
+          onChange={() => {}}
+        />
+        <SelectField
+          label="Quality"
+          options={[
+            { value: '720', label: '720p' },
+            { value: '1080', label: '1080p' },
+            { value: '4k', label: '4K' },
+          ]}
+          value="1080"
+          onChange={() => {}}
+        />
+      </div>
+    </Modal>
+  )
+}
+```
+
+## Rules
+
+- Always provide a close mechanism — the `onClose` prop is required
+- Primary action button goes on the right in the footer (Cancel left, action right)
+- Do not manually set backdrop/scrim backgrounds — the Modal component handles this
+- Do not nest modals — one modal at a time
+- Use `flex flex-col gap-lg` for form fields inside the modal body
+- Prefer `size="medium"` unless content clearly needs more or less space
