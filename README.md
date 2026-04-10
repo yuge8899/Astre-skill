@@ -4,12 +4,13 @@ Astra UI 设计系统技能包，用于生成符合 Astra 规范的 UI 页面。
 
 ## 当前版本
 
-**v1.7.0** - Progressive Disclosure 架构
+**v1.8.0** - shadcn/ui 集成 + page-agent 自动化测试
 
 ## 版本历史
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
+| v1.8.0 | 2026-04-10 | shadcn/ui 组件映射 + page-agent 自动化测试 + 图标硬规则 |
 | v1.7.0 | 2026-04-10 | Progressive Disclosure 架构，SKILL.md 精简 + references/ 分离 |
 | v1.6.0 | 2026-04-10 | 完整 Guidelines 内容嵌入 |
 | v1.5.0 | 2026-04-10 | Design Tokens 完整体系 + Guidelines 按需读取指引 |
@@ -26,7 +27,7 @@ Astra UI 设计系统技能包，用于生成符合 Astra 规范的 UI 页面。
 git clone https://github.com/yuge8899/Astre-skill.git
 
 # 创建符号链接
-ln -sf /path/to/Astre-skill/skills/astra-ui ~/.claude/skills/astra-ui
+ln -sf /path/to/Astre-skill/skills/astra-ui ~/.agents/skills/astra-ui
 ```
 
 ## 使用
@@ -49,35 +50,39 @@ Astre-skill/
 ├── CHANGELOG.md
 ├── skills/
 │   └── astra-ui/
-│       ├── SKILL.md          # 主技能文件 (235行)
+│       ├── SKILL.md          # 主技能文件 (421行)
 │       └── references/       # 按需读取的详细规则
-│           ├── tokens.md     # Design Tokens
-│           ├── components.md # 组件 Props
+│           ├── tokens.md     # Design Tokens (Tailwind v4)
+│           ├── components.md # shadcn/ui 组件映射
+│           ├── icons.md      # lucide.dev 图标规范
+│           ├── page-agent.md # 自动化测试
 │           ├── templates.md  # 页面模板
 │           ├── animation.md  # 动画规则
 │           ├── modes.md      # 暗色模式
-│           ├── focus.md      # 焦点样式
-│           └── icons.md      # 图标规则
+│           └── focus.md      # 焦点样式
 └── guidelines/               # 原始规则文档
 ```
 
 ## 设计系统特点
 
 - **风格**：专业 B2C SaaS，极简、干净、透气
-- **配色**：90% 中性色，品牌色仅用于主按钮
+- **配色**：Tailwind v4 Blue/Slate，90% 中性色
 - **布局**：卡片式，无边框，表面色对比分隔
-- **组件栈**：shadcn/ui + Arco Tabs + UIAstra
-- **图表**：shadcn/ui Chart（基于 Recharts）
+- **组件栈**：shadcn/ui + lucide-react + Arco Tabs
+- **自动化**：page-agent 自然语言测试
 
 ## 依赖安装
 
 ```bash
-# 基础组件
-npx shadcn@latest add button input table card dialog
+# 初始化 shadcn/ui
+npx shadcn@latest init
 
-# 图表组件
-npx shadcn@latest add chart
+# 安装常用组件
+npx shadcn@latest add button card input textarea select checkbox switch radio-group label badge toast tooltip dialog sheet table pagination avatar dropdown-menu separator scroll-area skeleton tabs breadcrumb
 
-# 图标
+# 安装图标
 npm install lucide-react
+
+# 安装自动化测试（可选）
+npm install page-agent
 ```
