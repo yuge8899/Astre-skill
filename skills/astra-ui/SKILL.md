@@ -299,12 +299,14 @@ npm install page-agent
 ### Media
 ```
 ├─ 头像？→ Avatar
+├─ 页面 / 卡片 / Hero 需要占位图？→ 读取 image-placeholders.md
 ├─ 内容卡片？→ ItemCard
 ├─ 视频时长？→ DurationBadge
 └─ 视频控制？→ VideoControl
 ```
 
 **所有组件 Props**：详见 [components.md](references/components.md)
+**占位图选择**：详见 [image-placeholders.md](references/image-placeholders.md)
 
 ---
 
