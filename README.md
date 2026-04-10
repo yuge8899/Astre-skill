@@ -6,6 +6,7 @@ Astra UI 设计系统技能包，用于生成符合 Astra 规范的 UI 页面。
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
+| v1.5.0 | 2026-04-10 | Design Tokens 完整体系 + Guidelines 按需读取指引 |
 | v1.4.0 | 2026-04-10 | shadcn/ui 组件安装清单，按类别分组 |
 | v1.3.0 | 2026-04-10 | 使用 shadcn/ui Chart 组件，保持 Astra 极简配色 |
 | v1.2.0 | 2026-04-10 | 新增 Analytics Dashboard 模板，图表配色规则 |
@@ -68,6 +69,7 @@ Astre-skill/
 ### 技能 (SKILL.md)
 
 - **设计原则**：极简配色、卡片式布局、无边框设计
+- **Design Tokens**：Spacing、Color、Radius、Typography、Elevation、Surfaces
 - **硬规则**：12 条强制规则
 - **页面模板**：5 个标准模板
   - Dashboard
@@ -78,6 +80,7 @@ Astre-skill/
 - **决策树**：Layout、Component 选择逻辑
 - **验证 Checklist**：Critical / Major / Minor 分层
 - **图表组件**：shadcn/ui Chart + Astra 配色
+- **按需读取指引**：Guidelines 文件映射表
 
 ### 规则文档 (guidelines/)
 

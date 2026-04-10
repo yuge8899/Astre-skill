@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.5.0] - 2026-04-10
+
+### Added
+
+- **Design Tokens 完整体系** - 内嵌核心 Token 定义
+  - Spacing: 6 级间距 token + 常用场景
+  - Color: 主要 token + Tailwind 映射 + 背景/文字选择规则
+  - Radius: 4 级圆角 + 组件映射
+  - Typography: 5 个主要 class + 常用模式
+  - Elevation: 阴影使用规则
+  - Surfaces: 表面分层策略
+
+- **按需读取 Guidelines 指引** - 完整的文件映射表
+  - Foundations: 9 个基础 token 文件
+  - Components: 15 个组件详细文档
+  - Composition: 4 个布局组合文档
+
+### Changed
+
+- 技能文件从 874 行扩展到 1049 行
+- Token 定义从简化版升级为完整版
+
 ## [v1.4.0] - 2026-04-10
 
 ### Added
