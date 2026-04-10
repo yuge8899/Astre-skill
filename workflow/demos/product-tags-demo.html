@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品标签 - Astra UI 原型</title>
+
+  <!-- Tailwind CSS v4.1.6 CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Astra UI Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          spacing: {
+            '5': '1.25rem',  /* 20px - Astra 页面边距 */
+          },
+          borderRadius: {
+            'md': '0.5rem',   /* 8px - Astra 按钮/输入框圆角 */
+            'xl': '1rem',     /* 16px - Astra 卡片圆角 */
+          },
+          fontSize: {
+            '2xl': '1.5rem',  /* 24px - Astra 页面标题 */
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- 引入官方中英文字体库 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    /* 抽屉滑入动画 */
+    .drawer-slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+    /* 弹窗淡入动画 */
+    .modal-fade-in {
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-900 bg-slate-50">
+
+  <!-- ==================== 全局组件 ==================== -->
+
+  <!-- Toast 提示 -->
+  <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg shadow-slate-900/10 text-sm z-[100] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-10px]">
+    <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+    <span id="toast-msg">提示消息</span>
+  </div>
+
+  <!-- 遮罩层（抽屉/弹窗共用） -->
+  <div id="overlay" class="fixed inset-0 bg-black/50 z-[90] hidden transition-opacity duration-200" onclick="closeAllModals()"></div>
+
+  <!-- ==================== 抽屉：新建标签组 ==================== -->
+  <div id="drawerCreate" class="fixed right-0 top-0 h-full w-[480px] bg-white shadow-2xl z-[95] hidden drawer-slide-in">
+    <div class="h-full flex flex-col">
+      <!-- 抽屉头部 -->
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">新建标签组</h2>
+          <p class="text-sm text-slate-500 mt-0.5">创建一个新的商品标签组</p>
+        </div>
+        <button onclick="closeDrawer('drawerCreate')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 抽屉内容 -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <div class="flex flex-col gap-5">
+          <!-- 标签组名称 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">标签组名称 <span class="text-red-500">*</span></label>
+            <input id="createName" type="text" placeholder="请输入标签组名称" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400">
+          </div>
+
+          <!-- 标签类型 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">标签类型</label>
+            <div class="flex gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="createType" value="mobile" checked class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500">
+                <span class="text-sm text-slate-600">移动端标签</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="createType" value="backend" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500">
+                <span class="text-sm text-slate-600">后端标签</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 标签值（可添加多个） -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">标签值</label>
+            <div id="createTagValues" class="flex flex-col gap-2">
+              <div class="flex gap-2 items-center">
+                <input type="text" placeholder="输入标签值" class="flex-1 bg-slate-100 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
+                <button onclick="addTagValueInput('createTagValues')" class="w-8 h-8 rounded-md bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 flex items-center justify-center transition-colors">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">可添加多个标签值，如"春夏"、"秋冬"等</p>
+          </div>
+
+          <!-- 备注 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">备注说明</label>
+            <textarea id="createRemark" placeholder="可选，填写备注说明" rows="3" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400 resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 抽屉底部 -->
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button onclick="closeDrawer('drawerCreate')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
+        <button onclick="submitCreate()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20">确认创建</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 抽屉：编辑标签组 ==================== -->
+  <div id="drawerEdit" class="fixed right-0 top-0 h-full w-[480px] bg-white shadow-2xl z-[95] hidden drawer-slide-in">
+    <div class="h-full flex flex-col">
+      <!-- 抽屉头部 -->
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">编辑标签组</h2>
+          <p class="text-sm text-slate-500 mt-0.5" id="editTitleHint">修改标签组信息</p>
+        </div>
+        <button onclick="closeDrawer('drawerEdit')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 抽屉内容 -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <div class="flex flex-col gap-5">
+          <!-- 标签组名称 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">标签组名称 <span class="text-red-500">*</span></label>
+            <input id="editName" type="text" placeholder="请输入标签组名称" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400">
+          </div>
+
+          <!-- 标签类型 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">标签类型</label>
+            <div class="flex gap-3">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="editType" value="mobile" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500">
+                <span class="text-sm text-slate-600">移动端标签</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="editType" value="backend" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500">
+                <span class="text-sm text-slate-600">后端标签</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 备注 -->
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">备注说明</label>
+            <textarea id="editRemark" placeholder="可选，填写备注说明" rows="3" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400 resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 抽屉底部 -->
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button onclick="closeDrawer('drawerEdit')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
+        <button onclick="submitEdit()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20">保存修改</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：管理标签值 ==================== -->
+  <div id="modalManageValues" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-[600px] max-h-[80vh] flex flex-col modal-fade-in">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">管理标签值</h2>
+          <p class="text-sm text-slate-500 mt-0.5" id="manageValuesHint">为标签组添加或删除标签值</p>
+        </div>
+        <button onclick="closeModal('modalManageValues')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 弹窗内容 -->
+      <div class="flex-1 overflow-y-auto p-6">
+        <!-- 添加新标签值 -->
+        <div class="flex gap-2 mb-5">
+          <input id="newTagValue" type="text" placeholder="输入新标签值" class="flex-1 bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
+          <button onclick="addTagValue()" class="px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20 flex items-center gap-1.5">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            添加
+          </button>
+        </div>
+
+        <!-- 标签值列表 -->
+        <div class="border border-slate-100 rounded-lg">
+          <div class="bg-slate-50/80 px-4 py-2.5 text-sm font-medium text-slate-500 border-b border-slate-100">
+            已有标签值
+          </div>
+          <div id="tagValuesList" class="flex flex-col">
+            <!-- 动态渲染 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 弹窗底部 -->
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button onclick="closeModal('modalManageValues')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：删除确认 ==================== -->
+  <div id="modalDeleteConfirm" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-[400px] modal-fade-in">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-5 border-b border-slate-100">
+        <h2 class="text-lg font-semibold text-slate-900">确认删除</h2>
+      </div>
+
+      <!-- 弹窗内容 -->
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+            <i data-lucide="trash-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-sm text-slate-600" id="deleteConfirmMsg">确定要删除该标签组吗？此操作不可撤销。</p>
+            <p class="text-xs text-slate-400 mt-2">删除后，关联的商品将失去该标签标记</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 弹窗底部 -->
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button onclick="closeModal('modalDeleteConfirm')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
+        <button onclick="confirmDelete()" class="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：批量删除确认 ==================== -->
+  <div id="modalBatchDelete" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-[400px] modal-fade-in">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-5 border-b border-slate-100">
+        <h2 class="text-lg font-semibold text-slate-900">批量删除</h2>
+      </div>
+
+      <!-- 弹窗内容 -->
+      <div class="px-6 py-5">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+            <i data-lucide="trash-2" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <p class="text-sm text-slate-600">确定要删除选中的 <span id="batchDeleteCount" class="font-semibold text-red-600">0</span> 个标签组吗？</p>
+            <p class="text-xs text-slate-400 mt-2">已关联商品的标签组将无法删除</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 弹窗底部 -->
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button onclick="closeModal('modalBatchDelete')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
+        <button onclick="confirmBatchDelete()" class="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：筛选高级设置 ==================== -->
+  <div id="modalFilter" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-[480px] modal-fade-in">
+      <!-- 弹窗头部 -->
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-900">高级筛选</h2>
+        <button onclick="closeModal('modalFilter')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 弹窗内容 -->
+      <div class="px-6 py-5 flex flex-col gap-4">
+        <!-- 标签类型筛选 -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">标签类型</label>
+          <select id="filterType" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700">
+            <option value="">全部类型</option>
+            <option value="mobile">移动端标签</option>
+            <option value="backend">后端标签</option>
+          </select>
+        </div>
+
+        <!-- 关联商品数筛选 -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">关联商品数</label>
+          <div class="flex gap-2">
+            <select id="filterCountOp" class="w-24 bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700">
+              <option value="gte">大于等于</option>
+              <option value="lte">小于等于</option>
+              <option value="eq">等于</option>
+            </select>
+            <input id="filterCountVal" type="number" placeholder="数量" min="0" class="flex-1 bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
+          </div>
+        </div>
+
+        <!-- 创建时间筛选 -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">创建时间</label>
+          <div class="flex gap-2">
+            <input id="filterDateStart" type="date" class="flex-1 bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900">
+            <span class="text-slate-400 flex items-center">至</span>
+            <input id="filterDateEnd" type="date" class="flex-1 bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900">
+          </div>
+        </div>
+      </div>
+
+      <!-- 弹窗底部 -->
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-between">
+        <button onclick="resetFilter()" class="text-sm text-slate-500 hover:text-slate-700 transition-colors flex items-center gap-1">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          重置筛选
+        </button>
+        <div class="flex items-center gap-3">
+          <button onclick="closeModal('modalFilter')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
+          <button onclick="applyFilter()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20">应用筛选</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 主布局 ==================== -->
+
+  <!-- [1] 一级导航 - PrimaryNav -->
+  <nav class="w-[110px] bg-slate-900 flex flex-col pt-6 shrink-0 z-20">
+    <div class="px-3 mb-8 flex justify-center">
+      <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold shadow-sm">A</div>
+    </div>
+
+    <div class="flex flex-col gap-1 px-2">
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="home" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">首页</span>
+      </a>
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg bg-blue-600 text-white transition-colors whitespace-nowrap overflow-hidden shadow-md shadow-blue-900/50">
+        <i data-lucide="package" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">商品</span>
+      </a>
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">订单</span>
+      </a>
+      <a href="scrm-dashboard-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">SCRM</span>
+      </a>
+    </div>
+
+    <div class="mt-auto mb-6 px-2">
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">设置</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- [2] 二级导航 - SecondaryNav -->
+  <nav class="w-[130px] bg-white py-6 px-3 shrink-0 z-10 flex flex-col gap-1.5">
+    <div class="px-2 mb-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">商品管理</div>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">商品库</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">分类管理</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] bg-blue-50 text-blue-600 font-medium">商品标签</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">属性参数</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">规格库</a>
+  </nav>
+
+  <!-- [3] 主内容区 -->
+  <main class="flex-1 overflow-hidden bg-slate-50 min-w-[850px] flex flex-col">
+
+    <!-- 顶部固定面包屑报头 -->
+    <header class="bg-white px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
+      <div class="flex items-center gap-2">
+        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">首页</a>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">商品管理</a>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+        <span class="text-slate-900 text-[13px] font-semibold">商品标签</span>
+      </div>
+    </header>
+
+    <!-- 内部滚动安全区 -->
+    <div class="flex-1 overflow-y-auto p-5 flex flex-col">
+
+    <!-- 功能说明头部模块 -->
+    <div class="bg-white rounded-xl p-5 mb-5 shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+          <i data-lucide="tag" class="w-6 h-6" stroke-width="2.5"></i>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-1.5">
+            <h1 class="text-[20px] font-bold text-slate-900 leading-none">商品标签</h1>
+            <a href="#" class="text-blue-600 hover:text-blue-600 flex items-center gap-1 text-[12px] font-medium transition-colors bg-blue-50/80 px-2 py-0.5 rounded-md hover:bg-blue-100">
+              查看示例
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+            </a>
+          </div>
+          <p class="text-[13px] text-slate-500 leading-relaxed max-w-4xl">
+            不同商品类型的某些特点需要通过商品标签来标识，可以通过标签组新增标签值来进行打标，分为移动端标签、后端标签。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主数据卡片 -->
+    <div class="bg-white rounded-xl p-5 flex flex-col flex-1">
+
+      <!-- 动作区与搜索区 -->
+      <div class="flex items-center justify-between mb-4">
+        <!-- 左侧按钮组 -->
+        <div class="flex items-center gap-3">
+          <button onclick="openDrawer('drawerCreate')" class="bg-blue-600 text-white px-5 py-2.5 rounded-md text-[13px] font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1.5 shadow-sm shadow-blue-600/20 active:translate-y-[1px]">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            新建标签组
+          </button>
+          <!-- 批量删除按钮（选中时显示） -->
+          <button id="batchDeleteBtn" onclick="openBatchDeleteModal()" class="hidden px-4 py-2.5 border border-red-200 text-red-600 text-[13px] font-medium rounded-md hover:bg-red-50 transition-colors flex items-center gap-1.5">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            批量删除 (<span id="selectedCount">0</span>)
+          </button>
+        </div>
+
+        <!-- 搜索与筛选区 -->
+        <div class="flex items-center gap-2.5">
+          <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+            <input id="searchInput" type="text" placeholder="按标签组名称搜索..." onkeydown="if(event.key==='Enter') doSearch()" class="w-64 bg-slate-100 rounded-md py-2 pl-9 pr-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400">
+          </div>
+          <button onclick="doSearch()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/20 text-[13px] font-semibold rounded-md transition-colors">
+            搜索
+          </button>
+          <button onclick="openModal('modalFilter')" class="px-4 py-2 border border-slate-200 text-slate-600 text-[13px] font-medium rounded-md hover:bg-slate-50 transition-colors flex items-center gap-1.5">
+            <i data-lucide="sliders-horizontal" class="w-4 h-4"></i>
+            筛选
+          </button>
+          <button onclick="resetSearch()" class="px-4 py-2 border border-slate-200 text-slate-600 text-[13px] font-medium rounded-md hover:bg-slate-50 transition-colors">
+            重置
+          </button>
+        </div>
+      </div>
+
+      <!-- 已选筛选条件提示 -->
+      <div id="filterTags" class="hidden flex items-center gap-2 mb-4 text-sm">
+        <span class="text-slate-500">当前筛选：</span>
+        <div id="filterTagsList" class="flex items-center gap-2">
+          <!-- 动态渲染 -->
+        </div>
+        <button onclick="resetAllFilters()" class="text-blue-600 hover:text-blue-700 text-xs font-medium flex items-center gap-1">
+          <i data-lucide="x" class="w-3 h-3"></i>
+          清除全部
+        </button>
+      </div>
+
+      <!-- 数据表格容器 -->
+      <div class="overflow-x-auto flex-1 border border-slate-100 rounded-lg rounded-b-none border-b-0">
+        <table class="w-full text-left border-collapse min-w-[700px]">
+          <thead>
+            <tr class="bg-slate-50/80 text-slate-500 text-[13px]">
+              <th class="py-3 px-5 font-semibold border-b border-slate-100 w-10">
+                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+              </th>
+              <th class="py-3 px-5 font-semibold border-b border-slate-100 w-1/3">标签组名称</th>
+              <th class="py-3 px-5 font-semibold border-b border-slate-100">标签类型</th>
+              <th class="py-3 px-5 font-semibold border-b border-slate-100">关联商品数</th>
+              <th class="py-3 px-5 font-semibold border-b border-slate-100">创建时间</th>
+              <th class="py-3 px-5 font-semibold border-b border-slate-100 text-right">操作</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="text-[13px] relative bg-white">
+          </tbody>
+        </table>
+
+        <!-- 空状态 -->
+        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 bg-white border-b border-slate-100">
+          <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-4">
+            <i data-lucide="tag" class="w-8 h-8"></i>
+          </div>
+          <h3 class="text-slate-900 font-semibold mb-1">暂无数据</h3>
+          <p class="text-slate-500 text-[13px] mb-5">没有找到匹配的商品标签组，或您尚未创建</p>
+          <button onclick="resetAllFilters()" class="bg-slate-50 text-slate-600 hover:bg-slate-100 px-5 py-2 rounded-md text-[13px] font-medium transition-colors border border-slate-200">清除筛选条件</button>
+        </div>
+      </div>
+
+      <!-- 分页区域 -->
+      <div id="paginationBar" class="mt-0 pt-4 border-t border-slate-100 flex items-center justify-between text-[13px] text-slate-500 bg-white pb-1">
+        <div class="flex items-center gap-4 pl-2">
+          <span id="totalCount">共 0 条记录</span>
+          <select id="pageSize" onchange="changePageSize()" class="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 outline-none focus:border-blue-500 text-slate-700">
+            <option value="10">10 条/页</option>
+            <option value="20">20 条/页</option>
+            <option value="50">50 条/页</option>
+          </select>
+        </div>
+
+        <div class="flex items-center pr-2">
+          <button id="prevPageBtn" onclick="goToPage(currentPage - 1)" class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-slate-50 disabled:opacity-50 transition-colors" disabled>
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+          </button>
+
+          <div id="pageNumbers" class="flex items-center mx-1 gap-1">
+            <!-- 动态渲染 -->
+          </div>
+
+          <button id="nextPageBtn" onclick="goToPage(currentPage + 1)" class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-50 transition-colors" disabled>
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+          </button>
+
+          <div class="flex items-center gap-2 ml-4">
+            <span class="text-slate-400">跳至</span>
+            <input id="jumpPageInput" type="text" onkeydown="if(event.key==='Enter') jumpToPage()" class="w-12 h-8 text-center border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-slate-700 bg-slate-50 focus:bg-white" value="1">
+            <span class="text-slate-400">页</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ==================== 初始化 ====================
+    lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+
+    // ==================== 数据 ====================
+    let MOCK_DATA = [
+      { id: 1, name: '适用季节', type: 'mobile', values: ['春', '夏', '秋', '冬'], count: 125, date: '2026-04-10 14:32:00', remark: '季节性商品标记' },
+      { id: 2, name: '商品材质', type: 'mobile', values: ['棉', '丝绸', '涤纶', '羊毛'], count: 342, date: '2026-04-09 10:15:30', remark: '材质分类标签' },
+      { id: 3, name: '营销大促', type: 'backend', values: ['618', '双11', '年货节'], count: 89, date: '2026-04-08 16:45:12', remark: '促销活动标记' },
+      { id: 4, name: '海外购特供', type: 'backend', values: ['欧美', '日韩', '东南亚'], count: 0, date: '2026-04-01 09:20:00', remark: '' },
+      { id: 5, name: '新品首发', type: 'mobile', values: ['新品', '热销', '限量'], count: 56, date: '2026-03-28 11:00:00', remark: '新品状态标记' },
+      { id: 6, name: '会员专享', type: 'backend', values: ['VIP', 'SVIP', '普通会员'], count: 234, date: '2026-03-20 08:30:00', remark: '会员等级标记' },
+    ];
+
+    let currentData = [...MOCK_DATA];
+    let filteredData = [...MOCK_DATA];
+    let selectedIds = [];
+    let currentPage = 1;
+    let pageSize = 10;
+    let deleteTargetId = null;
+    let editTargetId = null;
+    let manageTargetId = null;
+    let activeFilters = {};
+
+    // ==================== Toast ====================
+    let toastTimeout;
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      const icon = toast.querySelector('i');
+
+      msg.textContent = message;
+
+      if (type === 'error') {
+        icon.setAttribute('data-lucide', 'x-circle');
+        icon.className = 'w-4 h-4 text-red-400';
+      } else if (type === 'success') {
+        icon.setAttribute('data-lucide', 'check-circle');
+        icon.className = 'w-4 h-4 text-green-400';
+      } else {
+        icon.setAttribute('data-lucide', 'info');
+        icon.className = 'w-4 h-4 text-blue-400';
+      }
+      lucide.createIcons();
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-10px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-10px]');
+      }, 3000);
+    }
+
+    // ==================== 弹窗/抽屉控制 ====================
+    function openDrawer(id) {
+      document.getElementById('overlay').classList.remove('hidden');
+      document.getElementById(id).classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeDrawer(id) {
+      document.getElementById('overlay').classList.add('hidden');
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function openModal(id) {
+      document.getElementById('overlay').classList.remove('hidden');
+      document.getElementById(id).classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function closeModal(id) {
+      document.getElementById('overlay').classList.add('hidden');
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function closeAllModals() {
+      document.getElementById('overlay').classList.add('hidden');
+      ['drawerCreate', 'drawerEdit', 'modalManageValues', 'modalDeleteConfirm', 'modalBatchDelete', 'modalFilter'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+    }
+
+    // ==================== 新建标签组 ====================
+    function addTagValueInput(containerId) {
+      const container = document.getElementById(containerId);
+      const div = document.createElement('div');
+      div.className = 'flex gap-2 items-center';
+      div.innerHTML = `
+        <input type="text" placeholder="输入标签值" class="flex-1 bg-slate-100 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
+        <button onclick="this.parentElement.remove(); lucide.createIcons()" class="w-8 h-8 rounded-md bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      `;
+      container.appendChild(div);
+      lucide.createIcons();
+    }
+
+    function submitCreate() {
+      const name = document.getElementById('createName').value.trim();
+      const type = document.querySelector('input[name="createType"]:checked').value;
+      const remark = document.getElementById('createRemark').value.trim();
+      const valueInputs = document.querySelectorAll('#createTagValues input[type="text"]');
+      const values = Array.from(valueInputs).map(i => i.value.trim()).filter(v => v);
+
+      if (!name) {
+        showToast('请输入标签组名称', 'error');
+        return;
+      }
+
+      const newId = Math.max(...MOCK_DATA.map(d => d.id)) + 1;
+      const newItem = {
+        id: newId,
+        name,
+        type,
+        values,
+        count: 0,
+        date: new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\//g, '-'),
+        remark
+      };
+
+      MOCK_DATA.unshift(newItem);
+      currentData = [...MOCK_DATA];
+      applyFiltersAndSearch();
+      closeDrawer('drawerCreate');
+
+      // 清空表单
+      document.getElementById('createName').value = '';
+      document.getElementById('createRemark').value = '';
+      document.querySelector('input[name="createType"][value="mobile"]').checked = true;
+      document.getElementById('createTagValues').innerHTML = `
+        <div class="flex gap-2 items-center">
+          <input type="text" placeholder="输入标签值" class="flex-1 bg-slate-100 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
+          <button onclick="addTagValueInput('createTagValues')" class="w-8 h-8 rounded-md bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 flex items-center justify-center transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+          </button>
+        </div>
+      `;
+      lucide.createIcons();
+
+      showToast('标签组创建成功', 'success');
+    }
+
+    // ==================== 编辑标签组 ====================
+    function openEditDrawer(id) {
+      editTargetId = id;
+      const item = MOCK_DATA.find(i => i.id === id);
+      if (!item) return;
+
+      document.getElementById('editName').value = item.name;
+      document.getElementById('editRemark').value = item.remark || '';
+      document.querySelector(`input[name="editType"][value="${item.type}"]`).checked = true;
+      document.getElementById('editTitleHint').textContent = `正在编辑: ${item.name}`;
+
+      openDrawer('drawerEdit');
+    }
+
+    function submitEdit() {
+      const name = document.getElementById('editName').value.trim();
+      const type = document.querySelector('input[name="editType"]:checked').value;
+      const remark = document.getElementById('editRemark').value.trim();
+
+      if (!name) {
+        showToast('请输入标签组名称', 'error');
+        return;
+      }
+
+      const item = MOCK_DATA.find(i => i.id === editTargetId);
+      if (item) {
+        item.name = name;
+        item.type = type;
+        item.remark = remark;
+      }
+
+      applyFiltersAndSearch();
+      closeDrawer('drawerEdit');
+      showToast('标签组修改成功', 'success');
+    }
+
+    // ==================== 管理标签值 ====================
+    function openManageValuesModal(id) {
+      manageTargetId = id;
+      const item = MOCK_DATA.find(i => i.id === id);
+      if (!item) return;
+
+      document.getElementById('manageValuesHint').textContent = `标签组: ${item.name}`;
+      renderTagValuesList(item.values);
+
+      openModal('modalManageValues');
+    }
+
+    function renderTagValuesList(values) {
+      const container = document.getElementById('tagValuesList');
+      container.innerHTML = '';
+
+      if (values.length === 0) {
+        container.innerHTML = `<div class="px-4 py-8 text-center text-slate-400 text-sm">暂无标签值，请添加</div>`;
+        return;
+      }
+
+      values.forEach((val, idx) => {
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between px-4 py-3 border-b border-slate-100 last:border-b-0 hover:bg-slate-50/50 transition-colors group';
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-5 h-5 rounded bg-slate-100 text-slate-400 text-xs flex items-center justify-center">${idx + 1}</span>
+            <span class="text-sm text-slate-700">${val}</span>
+          </div>
+          <button onclick="removeTagValue(${idx})" class="w-7 h-7 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        `;
+        container.appendChild(div);
+      });
+      lucide.createIcons();
+    }
+
+    function addTagValue() {
+      const input = document.getElementById('newTagValue');
+      const val = input.value.trim();
+      if (!val) {
+        showToast('请输入标签值', 'error');
+        return;
+      }
+
+      const item = MOCK_DATA.find(i => i.id === manageTargetId);
+      if (item) {
+        if (item.values.includes(val)) {
+          showToast('该标签值已存在', 'error');
+          return;
+        }
+        item.values.push(val);
+        renderTagValuesList(item.values);
+        input.value = '';
+        showToast('标签值添加成功', 'success');
+      }
+    }
+
+    function removeTagValue(idx) {
+      const item = MOCK_DATA.find(i => i.id === manageTargetId);
+      if (item) {
+        item.values.splice(idx, 1);
+        renderTagValuesList(item.values);
+        showToast('标签值已删除', 'success');
+      }
+    }
+
+    // ==================== 删除功能 ====================
+    function openDeleteModal(id) {
+      const item = MOCK_DATA.find(i => i.id === id);
+      if (!item) return;
+
+      if (item.count > 0) {
+        showToast('该标签组已关联商品，无法删除', 'error');
+        return;
+      }
+
+      deleteTargetId = id;
+      document.getElementById('deleteConfirmMsg').textContent = `确定要删除标签组 "${item.name}" 吗？此操作不可撤销。`;
+      openModal('modalDeleteConfirm');
+    }
+
+    function confirmDelete() {
+      if (deleteTargetId) {
+        MOCK_DATA = MOCK_DATA.filter(i => i.id !== deleteTargetId);
+        applyFiltersAndSearch();
+        closeModal('modalDeleteConfirm');
+        showToast('删除成功', 'success');
+        deleteTargetId = null;
+      }
+    }
+
+    // ==================== 批量操作 ====================
+    function toggleSelectAll() {
+      const selectAll = document.getElementById('selectAll');
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+
+      if (selectAll.checked) {
+        selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+        checkboxes.forEach(cb => cb.checked = true);
+      } else {
+        selectedIds = [];
+        checkboxes.forEach(cb => cb.checked = false);
+      }
+
+      updateBatchDeleteBtn();
+    }
+
+    function toggleRowSelect(id) {
+      const idx = selectedIds.indexOf(id);
+      if (idx > -1) {
+        selectedIds.splice(idx, 1);
+      } else {
+        selectedIds.push(id);
+      }
+      updateBatchDeleteBtn();
+
+      // 更新全选状态
+      const checkboxes = document.querySelectorAll('.row-checkbox');
+      const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
+      document.getElementById('selectAll').checked = allChecked;
+    }
+
+    function updateBatchDeleteBtn() {
+      const btn = document.getElementById('batchDeleteBtn');
+      const count = document.getElementById('selectedCount');
+      count.textContent = selectedIds.length;
+
+      if (selectedIds.length > 0) {
+        btn.classList.remove('hidden');
+        btn.classList.add('flex');
+      } else {
+        btn.classList.add('hidden');
+        btn.classList.remove('flex');
+      }
+    }
+
+    function openBatchDeleteModal() {
+      const canDelete = selectedIds.filter(id => {
+        const item = MOCK_DATA.find(i => i.id === id);
+        return item && item.count === 0;
+      });
+
+      if (canDelete.length === 0) {
+        showToast('选中的标签组都已关联商品，无法删除', 'error');
+        return;
+      }
+
+      document.getElementById('batchDeleteCount').textContent = canDelete.length;
+      openModal('modalBatchDelete');
+    }
+
+    function confirmBatchDelete() {
+      const deletedCount = selectedIds.filter(id => {
+        const item = MOCK_DATA.find(i => i.id === id);
+        if (item && item.count === 0) {
+          MOCK_DATA = MOCK_DATA.filter(i => i.id !== id);
+          return true;
+        }
+        return false;
+      }).length;
+
+      selectedIds = [];
+      applyFiltersAndSearch();
+      closeModal('modalBatchDelete');
+      updateBatchDeleteBtn();
+      showToast(`成功删除 ${deletedCount} 个标签组`, 'success');
+    }
+
+    // ==================== 搜索与筛选 ====================
+    function doSearch() {
+      const keyword = document.getElementById('searchInput').value.trim();
+      activeFilters.keyword = keyword;
+      applyFiltersAndSearch();
+    }
+
+    function resetSearch() {
+      document.getElementById('searchInput').value = '';
+      activeFilters.keyword = '';
+      applyFiltersAndSearch();
+    }
+
+    function applyFilter() {
+      activeFilters.type = document.getElementById('filterType').value;
+      activeFilters.countOp = document.getElementById('filterCountOp').value;
+      activeFilters.countVal = document.getElementById('filterCountVal').value;
+      activeFilters.dateStart = document.getElementById('filterDateStart').value;
+      activeFilters.dateEnd = document.getElementById('filterDateEnd').value;
+
+      closeModal('modalFilter');
+      applyFiltersAndSearch();
+      updateFilterTags();
+      showToast('筛选条件已应用', 'success');
+    }
+
+    function resetFilter() {
+      document.getElementById('filterType').value = '';
+      document.getElementById('filterCountOp').value = 'gte';
+      document.getElementById('filterCountVal').value = '';
+      document.getElementById('filterDateStart').value = '';
+      document.getElementById('filterDateEnd').value = '';
+
+      activeFilters.type = '';
+      activeFilters.countOp = '';
+      activeFilters.countVal = '';
+      activeFilters.dateStart = '';
+      activeFilters.dateEnd = '';
+
+      closeModal('modalFilter');
+      applyFiltersAndSearch();
+      updateFilterTags();
+    }
+
+    function resetAllFilters() {
+      activeFilters = {};
+      document.getElementById('searchInput').value = '';
+      applyFiltersAndSearch();
+      updateFilterTags();
+    }
+
+    function updateFilterTags() {
+      const container = document.getElementById('filterTags');
+      const list = document.getElementById('filterTagsList');
+      const tags = [];
+
+      if (activeFilters.keyword) tags.push(`关键词: ${activeFilters.keyword}`);
+      if (activeFilters.type) tags.push(activeFilters.type === 'mobile' ? '移动端标签' : '后端标签');
+      if (activeFilters.countVal) tags.push(`商品数 ${activeFilters.countOp === 'gte' ? '≥' : activeFilters.countOp === 'lte' ? '≤' : '='} ${activeFilters.countVal}`);
+      if (activeFilters.dateStart || activeFilters.dateEnd) tags.push(`时间: ${activeFilters.dateStart || '起始'} ~ ${activeFilters.dateEnd || '至今'}`);
+
+      if (tags.length > 0) {
+        container.classList.remove('hidden');
+        container.classList.add('flex');
+        list.innerHTML = tags.map(t => `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs">${t}</span>`).join('');
+      } else {
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+      }
+    }
+
+    function applyFiltersAndSearch() {
+      filteredData = MOCK_DATA.filter(item => {
+        // 关键词搜索
+        if (activeFilters.keyword && !item.name.includes(activeFilters.keyword)) return false;
+        // 类型筛选
+        if (activeFilters.type && item.type !== activeFilters.type) return false;
+        // 商品数筛选
+        if (activeFilters.countVal) {
+          const val = parseInt(activeFilters.countVal);
+          const op = activeFilters.countOp;
+          if (op === 'gte' && item.count < val) return false;
+          if (op === 'lte' && item.count > val) return false;
+          if (op === 'eq' && item.count !== val) return false;
+        }
+        // 时间筛选
+        if (activeFilters.dateStart && item.date < activeFilters.dateStart) return false;
+        if (activeFilters.dateEnd && item.date > activeFilters.dateEnd + ' 23:59:59') return false;
+        return true;
+      });
+
+      currentPage = 1;
+      renderTable();
+      updateFilterTags();
+    }
+
+    // ==================== 分页 ====================
+    function changePageSize() {
+      pageSize = parseInt(document.getElementById('pageSize').value);
+      currentPage = 1;
+      renderTable();
+    }
+
+    function goToPage(page) {
+      const totalPages = Math.ceil(filteredData.length / pageSize);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      renderTable();
+    }
+
+    function jumpToPage() {
+      const page = parseInt(document.getElementById('jumpPageInput').value);
+      goToPage(page);
+    }
+
+    // ==================== 表格渲染 ====================
+    function renderTable() {
+      const tbody = document.getElementById('tableBody');
+      const emptyState = document.getElementById('emptyState');
+      const countText = document.getElementById('totalCount');
+
+      const start = (currentPage - 1) * pageSize;
+      const pageData = filteredData.slice(start, start + pageSize);
+      const totalPages = Math.ceil(filteredData.length / pageSize);
+
+      tbody.innerHTML = '';
+      countText.textContent = `共 ${filteredData.length} 条记录`;
+
+      // 更新分页按钮
+      document.getElementById('prevPageBtn').disabled = currentPage === 1;
+      document.getElementById('nextPageBtn').disabled = currentPage >= totalPages;
+      document.getElementById('jumpPageInput').value = currentPage;
+
+      // 渲染页码
+      const pageNumbers = document.getElementById('pageNumbers');
+      pageNumbers.innerHTML = '';
+      for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+        const btn = document.createElement('button');
+        btn.className = i === currentPage
+          ? 'w-8 h-8 flex items-center justify-center rounded bg-blue-600 text-white font-semibold border border-blue-700 shadow-sm shadow-blue-600/20'
+          : 'w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-600 hover:bg-slate-50 font-medium transition-colors';
+        btn.textContent = i;
+        btn.onclick = () => goToPage(i);
+        pageNumbers.appendChild(btn);
+      }
+
+      if (filteredData.length === 0) {
+        tbody.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+      } else {
+        tbody.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+
+        pageData.forEach(item => {
+          const typeBadge = item.type === 'mobile'
+            ? `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-medium">移动端</span>`
+            : `<span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-xs font-medium">后端</span>`;
+
+          const countBadge = item.count > 0
+            ? `<span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-xs font-semibold">${item.count} 件</span>`
+            : `<span class="text-slate-400 text-xs">0 件</span>`;
+
+          const isSelected = selectedIds.includes(item.id);
+
+          const tr = document.createElement('tr');
+          tr.className = 'border-b border-slate-100 hover:bg-slate-50/70 transition-colors group';
+          tr.innerHTML = `
+            <td class="py-4 px-5">
+              <input type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" data-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="toggleRowSelect(${item.id})">
+            </td>
+            <td class="py-4 px-5 font-medium text-slate-900">${item.name}</td>
+            <td class="py-4 px-5">${typeBadge}</td>
+            <td class="py-4 px-5">${countBadge}</td>
+            <td class="py-4 px-5 text-slate-500 text-xs">${item.date}</td>
+            <td class="py-4 px-5 text-right">
+              <div class="flex items-center justify-end gap-3">
+                <button onclick="openManageValuesModal(${item.id})" class="text-blue-600 hover:text-blue-700 text-xs font-normal transition-colors">管理标签值</button>
+                <div class="w-px h-3 bg-slate-300"></div>
+                <button onclick="openEditDrawer(${item.id})" class="text-blue-600 hover:text-blue-700 text-xs font-normal transition-colors">编辑</button>
+                <button onclick="openDeleteModal(${item.id})" class="text-blue-600 hover:text-blue-700 text-xs font-normal transition-colors">删除</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      lucide.createIcons();
+    }
+
+    // ==================== 初始化 ====================
+    window.onload = () => {
+      renderTable();
+    };
+  </script>
+</body>
+</html>

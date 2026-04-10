@@ -31,7 +31,7 @@
 - `brand-500` — 主按钮默认状态
 - `brand-600` — 主按钮悬停
 - `brand-700` — 主题色、主按钮按下
-- `brand-100` — 页面画布背景
+- `brand-100` — 激活态浅背景、图标说明卡背景
 - `brand-200` — AI 气泡、微妙高亮
 
 ### 中性色 (Slate)
@@ -55,8 +55,8 @@
 | 语义 Token | Tailwind Class | 用途 |
 |------------|----------------|------|
 | `surface-bg` | `bg-white` | 卡片、面板、导航背景 |
-| `surface-secondary-bg` | `bg-slate-100` | 二级导航面板 |
-| `surface-canvas` | `bg-blue-100` | 页面画布背景 |
+| `surface-secondary-bg` | `bg-white` | 二级导航面板 |
+| `surface-canvas` | `bg-slate-50` | 页面画布背景 |
 | `text-primary` | `text-slate-900` | 主要文字 |
 | `text-secondary` | `text-slate-500` | 次要文字、描述 |
 | `text-tertiary` | `text-slate-400` | 占位符、禁用文字 |
@@ -81,10 +81,10 @@
 ```
 ┌─ "What background?"
 │
-├─ 页面画布？→ bg-blue-100
+├─ 页面画布？→ bg-slate-50
 ├─ 卡片/面板？→ bg-white
-├─ 一级导航？→ bg-white
-├─ 二级导航？→ bg-slate-100
+├─ 一级导航？→ bg-slate-900
+├─ 二级导航？→ bg-white
 ├─ 输入框？→ bg-slate-100
 ├─ 主按钮？→ bg-blue-500 + text-white
 │            hover:bg-blue-600, active:bg-blue-700
@@ -126,7 +126,7 @@
 
 1. **90% 中性表面** — Slate 色系为主
 2. **品牌色仅用于主操作** — Blue-500/600/700
-3. **页面画布用 brand-100** — `bg-blue-100`
+3. **页面画布用 slate-50** — `bg-slate-50`
 4. **卡片用纯白** — `bg-white`
 5. **无边框设计** — 用表面色对比分隔
 
@@ -144,8 +144,8 @@
 // ❌ 错误：页面背景用白色
 <main className="bg-white">
 
-// ✅ 正确：页面背景用 brand-100
-<main className="bg-blue-100">
+// ✅ 正确：页面背景用 slate-50
+<main className="bg-slate-50">
 
 // ❌ 错误：卡片加边框
 <div className="bg-white border border-slate-200">
@@ -158,109 +158,148 @@
 
 ## Spacing 间距
 
-使用 Tailwind 默认间距 scale：
+使用 Tailwind CSS v4 CSS 变量：
 
-| Tailwind | 值 | 用途 |
-|----------|-----|------|
-| `p-1` / `gap-1` | 4px | 最小间距 |
-| `p-2` / `gap-2` | 8px | 组件内间距 |
-| `p-3` / `gap-3` | 12px | 字段间距 |
-| `p-4` / `gap-4` | 16px | 卡片内边距、卡片间距 |
-| `p-6` / `gap-6` | 24px | 页面边距 |
-| `p-8` / `gap-8` | 32px | 大区块分隔 |
+| Tailwind Class | CSS 变量 | 值 | 用途 |
+|----------------|----------|-----|------|
+| `p-1` / `gap-1` | `--spacing-1` | `0.25rem` (4px) | 最小间距 |
+| `p-2` / `gap-2` | `--spacing-2` | `0.5rem` (8px) | 组件内间距 |
+| `p-3` / `gap-3` | `--spacing-3` | `0.75rem` (12px) | 字段间距 |
+| `p-4` / `gap-4` | `--spacing-4` | `1rem` (16px) | 卡片内边距、卡片间距 |
+| `p-5` / `gap-5` | `--spacing-5` | `1.25rem` (20px) | 页面边距（Astra 默认） |
+| `p-6` / `gap-6` | `--spacing-6` | `1.5rem` (24px) | 大页面边距 |
+| `p-8` / `gap-8` | `--spacing-8` | `2rem` (32px) | 大区块分隔 |
+
+**CSS 变量使用方式**：
+```css
+/* 在 @theme 中自定义 */
+@theme {
+  --spacing-5: 1.25rem;  /* 20px - Astra 页面边距 */
+}
+```
 
 **决策树**：
 ```
 ┌─ "What spacing?"
 │
-├─ 最小间距？→ p-1 / gap-1 (4px)
-├─ 组件内间距？→ p-2 / gap-2 (8px)
-├─ 字段间距？→ gap-3 (12px)
-├─ 卡片内边距？→ p-4 (16px)
-├─ 卡片间距？→ gap-4 (16px)
-└─ 页面边距？→ p-6 (24px)
+├─ 最小间距？→ p-1 (--spacing-1: 4px)
+├─ 组件内间距？→ p-2 (--spacing-2: 8px)
+├─ 字段间距？→ gap-3 (--spacing-3: 12px)
+├─ 卡片内边距？→ p-4 (--spacing-4: 16px)
+├─ 卡片间距？→ gap-4 (--spacing-4: 16px)
+├─ 页面边距？→ p-5 (--spacing-5: 20px) ← Astra 默认
+└─ 大区块分隔？→ gap-8 (--spacing-8: 32px)
 ```
 
 **常用场景**：
-| 场景 | Tailwind |
-|------|----------|
-| 页面边距 | `p-6` |
-| 卡片内边距 | `p-4` |
-| 卡片间距 | `gap-4` |
-| 字段间距 | `gap-3` |
-| 标题到描述 | `mt-1` |
+| 场景 | Tailwind Class | CSS 变量 |
+|------|----------------|----------|
+| 页面边距 | `p-5` | `--spacing-5` |
+| 卡片内边距 | `p-4` / `p-5` | `--spacing-4` / `--spacing-5` |
+| 卡片间距 | `gap-5` | `--spacing-5` |
+| 字段间距 | `gap-3` | `--spacing-3` |
+| 标题到描述 | `mt-1` | `--spacing-1` |
 
 **规则**：
-- 使用 Tailwind 默认间距 scale — 禁止硬编码像素值
+- 使用 Tailwind CSS v4 变量 — 禁止硬编码像素值
 - 卡片内字段用 `flex flex-col gap-3`
-- 区块卡片之间用 `flex flex-col gap-4`
+- 区块卡片之间用 `flex flex-col gap-5`
 
 ---
 
 ## Radius 圆角
 
-使用 Tailwind 默认圆角 scale：
+使用 Tailwind CSS v4 CSS 变量：
 
-| Tailwind | 值 | 用途 |
-|----------|-----|------|
-| `rounded` | 4px | 小元素 |
-| `rounded-md` | 6px | 输入框、Badge |
-| `rounded-lg` | 8px | 交互元素 |
-| `rounded-xl` | 12px | 卡片、面板 |
-| `rounded-2xl` | 16px | 大卡片 |
-| `rounded-full` | 9999px | 按钮（胶囊）、头像 |
+| Tailwind Class | CSS 变量 | 值 | 用途 |
+|----------------|----------|-----|------|
+| `rounded` | `--radius-default` | `0.25rem` (4px) | 小元素 |
+| `rounded-sm` | `--radius-sm` | `0.125rem` (2px) | 微小圆角 |
+| `rounded-md` | `--radius-md` | `0.5rem` (8px) | 输入框、Badge、Button（Astra 默认） |
+| `rounded-lg` | `--radius-lg` | `0.75rem` (12px) | 交互元素 |
+| `rounded-xl` | `--radius-xl` | `1rem` (16px) | 卡片、面板（Astra 默认） |
+| `rounded-2xl` | `--radius-2xl` | `1.5rem` (24px) | 大卡片 |
+| `rounded-full` | `--radius-full` | `9999px` | 头像、圆形元素 |
+
+**CSS 变量使用方式**：
+```css
+/* 在 @theme 中自定义 */
+@theme {
+  --radius-md: 0.5rem;   /* 8px - Astra 按钮圆角 */
+  --radius-xl: 1rem;     /* 16px - Astra 卡片圆角 */
+}
+```
 
 **决策树**：
 ```
 ┌─ "What radius?"
 │
-├─ 小元素（badge、dot）？→ rounded (4px)
-├─ 交互元素（input、select）？→ rounded-md (6px)
-├─ 内容卡片？→ rounded-xl (12px)
-├─ 按钮？→ rounded-full (胶囊)
-└─ 头像？→ rounded-full (圆形)
+├─ 小元素（badge、dot）？→ rounded (--radius-default: 4px)
+├─ 交互元素（input、select、button）？→ rounded-md (--radius-md: 8px) ← Astra 默认
+├─ 内容卡片？→ rounded-xl (--radius-xl: 16px) ← Astra 默认
+└─ 头像？→ rounded-full (--radius-full: 9999px)
 ```
 
 **组件映射**：
-| 组件 | 圆角 |
-|------|------|
-| Button | `rounded-full` |
-| InputField, SelectField | `rounded-md` |
-| 卡片、面板 | `rounded-xl` |
-| Badge | `rounded-md` |
-| Avatar (circle) | `rounded-full` |
+| 组件 | 圆角 Class | CSS 变量 |
+|------|------------|----------|
+| Button | `rounded-md` | `--radius-md` (8px) |
+| InputField, SelectField | `rounded-md` | `--radius-md` (8px) |
+| 卡片、面板 | `rounded-xl` | `--radius-xl` (16px) |
+| Badge | `rounded-md` | `--radius-md` (8px) |
+| Avatar (circle) | `rounded-full` | `--radius-full` (9999px) |
 
 **规则**：
-- 卡片使用 `rounded-xl`
-- 交互元素使用 `rounded-md`
-- 按钮和头像使用 `rounded-full`
+- 卡片使用 `rounded-xl` (`--radius-xl: 16px`)
+- 交互元素使用 `rounded-md` (`--radius-md: 8px`)
+- Astra 禁用 `rounded-full` 按钮（胶囊按钮）
 
 ---
 
 ## Typography 排版
 
-使用 Tailwind 默认字体 size：
+使用 Tailwind CSS v4 CSS 变量：
 
-| Tailwind | 大小 | 用途 |
-|----------|------|------|
-| `text-xs` | 12px | 元数据、时间戳 |
-| `text-sm` | 14px | 描述、帮助文字 |
-| `text-base` | 16px | 正文、按钮文字 |
-| `text-lg` | 18px | 区块标题 |
-| `text-xl` | 20px | 页面副标题 |
-| `text-2xl` | 24px | 页面标题 |
-| `text-3xl` | 30px | 大标题 |
+### 字体大小
+
+| Tailwind Class | CSS 变量 | 值 | 用途 |
+|----------------|----------|-----|------|
+| `text-xs` | `--text-xs` | `0.75rem` (12px) | 元数据、时间戳 |
+| `text-sm` | `--text-sm` | `0.875rem` (14px) | 描述、帮助文字 |
+| `text-base` | `--text-base` | `1rem` (16px) | 正文、按钮文字 |
+| `text-lg` | `--text-lg` | `1.125rem` (18px) | 区块标题 |
+| `text-xl` | `--text-xl` | `1.25rem` (20px) | 页面副标题 |
+| `text-2xl` | `--text-2xl` | `1.5rem` (24px) | 页面标题 |
+| `text-3xl` | `--text-3xl` | `1.875rem` (30px) | 大标题 |
+
+### 字重
+
+| Tailwind Class | CSS 变量 | 值 | 用途 |
+|----------------|----------|-----|------|
+| `font-normal` | `--font-weight-normal` | `400` | 正常字重 |
+| `font-medium` | `--font-weight-medium` | `500` | 标签、区块标题 |
+| `font-semibold` | `--font-weight-semibold` | `600` | 页面标题、强调 |
+| `font-bold` | `--font-weight-bold` | `700` | 最强强调 |
+
+**CSS 变量使用方式**：
+```css
+/* 在 @theme 中自定义 */
+@theme {
+  --text-2xl: 1.5rem;     /* 24px - Astra 页面标题 */
+  --font-weight-semibold: 600;
+}
+```
 
 **决策树**：
 ```
 ┌─ "What typography?"
 │
-├─ 页面标题？→ text-2xl font-semibold
-├─ 区块标题？→ text-lg font-medium
-├─ 表单标签？→ text-base font-medium
-├─ 描述、帮助文字？→ text-sm text-slate-500
-├─ 输入框值？→ text-base
-└─ 元数据、时间戳？→ text-xs text-slate-400
+├─ 页面标题？→ text-2xl (--text-2xl: 24px) font-semibold (--font-weight-semibold: 600)
+├─ 区块标题？→ text-lg (--text-lg: 18px) font-medium (--font-weight-medium: 500)
+├─ 表单标签？→ text-base (--text-base: 16px) font-medium (--font-weight-medium: 500)
+├─ 描述、帮助文字？→ text-sm (--text-sm: 14px) text-slate-500
+├─ 输入框值？→ text-base (--text-base: 16px)
+└─ 元数据、时间戳？→ text-xs (--text-xs: 12px) text-slate-400
 ```
 
 **常用模式**：
@@ -274,9 +313,9 @@
 ```
 
 **规则**：
-- 使用 Tailwind 默认字体 size
+- 使用 Tailwind CSS v4 字体变量
 - 颜色单独设置：`text-slate-900`、`text-slate-500`
-- 通过 font-weight 控制重量：`font-medium`、`font-semibold`
+- 通过 font-weight 控制重量：`font-medium` (`--font-weight-medium`)、`font-semibold` (`--font-weight-semibold`)
 
 ---
 
@@ -284,29 +323,42 @@
 
 原则：~95% 元素无阴影，用表面色对比区分。
 
-| 级别 | 用途 | Tailwind |
-|------|------|----------|
-| 无 | **~95% 元素** | 卡片、面板、导航、输入框、按钮 |
-| 微阴影 | 浮动层 | `shadow-sm` |
-| 中阴影 | Dropdown | `shadow-md` |
-| 遮罩 | Modal | `bg-black/75` |
+使用 Tailwind CSS v4 CSS 变量：
+
+| Tailwind Class | CSS 变量 | 用途 |
+|----------------|----------|------|
+| 无阴影 | — | **~95% 元素**：卡片、面板、导航、输入框、按钮 |
+| `shadow-sm` | `--shadow-sm` | 浮动工具栏 |
+| `shadow-md` | `--shadow-md` | Dropdown |
+| `shadow-lg` | `--shadow-lg` | Modal |
+| `shadow-xl` | `--shadow-xl` | 大浮动层 |
+
+**CSS 变量定义（Tailwind v4 默认值）**：
+```css
+/* Tailwind v4 内置阴影变量 */
+--shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+--shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+--shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+--shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+```
 
 **决策树**：
 ```
 ┌─ "Should I add shadow?"
 │
-├─ 卡片或面板？→ No — 用 white on blue-100
+├─ 卡片或面板？→ No — 用 white on slate-50
 ├─ 导航？→ No — 无边框无阴影
 ├─ 按钮或输入框？→ No — 用 border 和 background
-├─ 浮动工具栏？→ Yes — shadow-sm
-├─ Modal？→ Yes — 遮罩层 + shadow-lg
-└─ Dropdown？→ shadow-md
+├─ 浮动工具栏？→ Yes — shadow-sm (--shadow-sm)
+├─ Modal？→ Yes — 遮罩层 bg-black/75 + shadow-lg (--shadow-lg)
+└─ Dropdown？→ shadow-md (--shadow-md)
 ```
 
 **规则**：
 - 默认无阴影 — 用表面色对比
 - 仅浮动层使用阴影（toolbar、modal、dropdown）
 - 卡片、面板、导航不使用阴影
+- 使用 CSS 变量 `--shadow-*` 便于统一修改
 
 ---
 
@@ -314,23 +366,23 @@
 
 **分层策略**：
 ```
-bg-blue-100         → 页面画布（品牌背景）
-bg-white            → 卡片、面板、导航（浮在画布上）
-bg-slate-100        → 二级导航面板、输入框背景
+bg-slate-50         → 页面画布（中性背景）
+bg-white            → 卡片、面板、二级导航（浮在画布上）
+bg-slate-100        → 输入框背景
 bg-slate-50         → 悬停状态、微妙背景
 ```
 
 **分离策略**：用表面色对比，不用边框：
 ```tsx
 // ✅ 正确：表面色对比
-<main className="bg-blue-100 p-6">
+<main className="bg-slate-50 p-5">
   <div className="bg-white rounded-xl p-4">
     {/* 卡片浮在画布上 */}
   </div>
 </main>
 
 // ❌ 错误：多余边框
-<main className="bg-blue-100 p-6">
+<main className="bg-slate-50 p-5">
   <div className="bg-white border border-slate-200 rounded-xl p-4">
     {/* 边框多余 */}
   </div>
@@ -338,7 +390,7 @@ bg-slate-50         → 悬停状态、微妙背景
 ```
 
 **规则**：
-- 页面画布始终使用 `bg-blue-100`
+- 页面画布始终使用 `bg-slate-50`
 - 卡片和面板使用 `bg-white`
 - 表面色对比是主要分隔工具 — 不用边框
 - 表单字段必须放在 `bg-white` 卡片内
@@ -350,7 +402,7 @@ bg-slate-50         → 悬停状态、微妙背景
 ### Color
 - ❌ `text-slate-900` 在 `bg-blue-500` 背景上（应使用 `text-white`）
 - ❌ `bg-blue-500` 作为大面积背景
-- ❌ 页面背景用白色或灰色（应使用 `bg-blue-100`）
+- ❌ 页面背景用纯白（应使用 `bg-slate-50`）
 - ❌ 卡片加边框（应使用表面色对比）
 - ❌ 卡片加阴影（阴影仅用于浮动层）
 
@@ -372,6 +424,6 @@ bg-slate-50         → 悬停状态、微妙背景
 - ❌ 导航使用阴影
 
 ### Surfaces
-- ❌ 白色/灰色页面背景（应使用 `bg-blue-100`）
+- ❌ 蓝色品牌大面积页面背景（应使用 `bg-slate-50`）
 - ❌ 内容直接放在画布上（应包裹在 `bg-white` 卡片内）
 - ❌ 在已有表面色对比的地方再加边框

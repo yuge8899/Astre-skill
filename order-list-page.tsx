@@ -121,7 +121,7 @@ const columns = [
     fixed: 'right' as const,
     render: () => (
       <div className="flex items-center gap-sm">
-        <Button variant="subtle" size="small" iconStart={<Eye className="size-4" strokeWidth={1.5} />}>
+        <Button variant="subtle" size="small" iconStart={<Eye className="size-4" strokeWidth={2.5} />}>
           View
         </Button>
       </div>
@@ -155,36 +155,36 @@ export function OrderListPage() {
       <SidebarNavigation
         footer={
           <>
-            <SidebarButton icon={<Settings className="size-full" strokeWidth={1.5} />} />
+            <SidebarButton icon={<Settings className="size-full" strokeWidth={2.5} />} />
             <Avatar type="image" src="/user.jpg" size="medium" shape="circle" />
           </>
         }
       >
-        <SidebarButton icon={<Home className="size-full" strokeWidth={1.5} />} />
-        <SidebarButton icon={<Film className="size-full" strokeWidth={1.5} />} active />
-        <SidebarButton icon={<Book className="size-full" strokeWidth={1.5} />} />
-        <SidebarButton icon={<Folder className="size-full" strokeWidth={1.5} />} />
+        <SidebarButton icon={<Home className="size-full" strokeWidth={2.5} />} />
+        <SidebarButton icon={<Film className="size-full" strokeWidth={2.5} />} active />
+        <SidebarButton icon={<Book className="size-full" strokeWidth={2.5} />} />
+        <SidebarButton icon={<Folder className="size-full" strokeWidth={2.5} />} />
       </SidebarNavigation>
 
       {/* Secondary Nav */}
       <SecondaryNav title="Orders">
-        <SecondaryNavItem icon={<Film className="size-full" strokeWidth={1.5} />} label="All Orders" active />
-        <SecondaryNavItem icon={<Filter className="size-full" strokeWidth={1.5} />} label="Pending" />
-        <SecondaryNavItem icon={<Book className="size-full" strokeWidth={1.5} />} label="Completed" />
+        <SecondaryNavItem icon={<Film className="size-full" strokeWidth={2.5} />} label="All Orders" active />
+        <SecondaryNavItem icon={<Filter className="size-full" strokeWidth={2.5} />} label="Pending" />
+        <SecondaryNavItem icon={<Book className="size-full" strokeWidth={2.5} />} label="Completed" />
       </SecondaryNav>
 
       {/* Main Content */}
-      <main className="flex-1 bg-brand-tertiary overflow-y-auto p-2xl">
+      <main className="flex-1 bg-brand-tertiary bg-slate-50 overflow-y-auto p-2xl p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-xl">
           <h1 className="text-title text-text-primary">Orders</h1>
-          <Button variant="primary" iconStart={<Plus className="size-4" strokeWidth={1.5} />}>
+          <Button variant="primary" iconStart={<Plus className="size-4" strokeWidth={2.5} />}>
             New Order
           </Button>
         </div>
 
         {/* Data Card */}
-        <div className="bg-surface-bg rounded-corner-lg p-xl">
+        <div className="bg-surface-bg bg-white rounded-corner-lg p-xl">
           {/* Filter Bar */}
           <div className="flex items-center gap-lg mb-md">
             <InputField

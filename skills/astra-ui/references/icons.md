@@ -24,15 +24,15 @@ import { Home, Search, Settings } from 'lucide-react'
 
 | 上下文 | strokeWidth |
 |--------|-------------|
-| 一级导航图标 | `1.5` |
-| 二级导航图标 | `1.5` |
+| 一级导航图标 | `2.5` |
+| 二级导航图标 | `2.5` |
 | 其他场景 | `2`（默认，可省略） |
 
 ## 尺寸模式
 
 ```tsx
-// 导航图标 18px + strokeWidth 1.5
-<Home className="w-[18px] h-[18px]" strokeWidth={1.5} />
+// 导航图标 18px + strokeWidth 2.5
+<Home className="w-[18px] h-[18px]" strokeWidth={2.5} />
 
 // 按钮图标 16px
 <Button iconStart={<Plus size={16} />}>Add</Button>
@@ -74,7 +74,7 @@ import { Home, Search, Settings } from 'lucide-react'
 |------|------|------|
 | `size` | `24` | 图标尺寸（像素） |
 | `color` | `"currentColor"` | 颜色（推荐用父元素 class） |
-| `strokeWidth` | `2` | 线条粗细 — 导航图标用 `1.5` |
+| `strokeWidth` | `2` | 线条粗细 — 导航图标用 `2.5` |
 | `className` | — | 额外 class |
 
 ## 标准图标目录
@@ -119,5 +119,5 @@ import { Home, Search, Settings } from 'lucide-react'
 2. 从 `lucide-react` 导入 — 不从其他库导入
 3. 不创建内联 SVG
 4. 同一上下文中图标尺寸一致
-5. 导航图标用 `strokeWidth={1.5}`
+5. 导航图标用 `strokeWidth={2.5}`
 6. 通过父元素文字 class 控制颜色，不用 `color` prop

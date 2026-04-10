@@ -1,0 +1,4 @@
+interface:
+  display_name: "Astra UI"
+  short_description: "Create and validate Astra admin UI"
+  default_prompt: "Use $astra-ui to create or review an Astra-compliant admin page."
