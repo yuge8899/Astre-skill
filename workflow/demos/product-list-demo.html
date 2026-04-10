@@ -226,7 +226,7 @@
         <div class="flex gap-6 mb-6">
           <!-- 商品图片 -->
           <div id="detailImages" class="w-[240px] shrink-0">
-            <div class="aspect-square bg-slate-100 rounded-xl mb-2 flex items-center justify-center text-4xl" id="detailMainImage">📱</div>
+            <div class="aspect-square bg-slate-100 rounded-xl mb-2 overflow-hidden" id="detailMainImage"><img src="" alt="商品图片" class="w-full h-full object-cover"></div>
             <div class="grid grid-cols-4 gap-2" id="detailThumbnails"></div>
           </div>
           <!-- 商品信息 -->
@@ -406,16 +406,46 @@
   <script>
     lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
 
+    // Unsplash 图片 URL
+    const UNSPLASH_BASE = 'https://images.unsplash.com/';
+    const PRODUCT_IMAGES = {
+      electronics: [
+        'photo-1511707171634-5f897ff02aa9?w=200&q=80', // 智能手机
+        'photo-1505740420928-5e560c06d30e?w=200&q=80', // 耳机
+        'photo-1496181133206-80ce9b88a853?w=200&q=80', // 笔记本
+        'photo-1517694712202-14dd9538aa97?w=200&q=80', // 电脑
+      ],
+      clothing: [
+        'photo-1542291026-7eec264c27ff?w=200&q=80', // 运动鞋
+        'photo-1515886657613-9f3515b0c78f?w=200&q=80', // 时尚服装
+        'photo-1489987707025-afc232f7ea0f?w=200&q=80', // 衣架
+      ],
+      home: [
+        'photo-1586023492125-27b2c045efd7?w=200&q=80', // 客厅
+        'photo-1522771739844-6a9f6d5f14af?w=200&q=80', // 卧室
+        'photo-1556909114-44e3e70034e2?w=200&q=80', // 家电
+      ],
+      food: [
+        'photo-1565299624946-b28f40a0ae38?w=200&q=80', // 零食
+        'photo-1509042239860-f550ce710b93?w=200&q=80', // 坚果
+        'photo-1551024601-bec78aea704b?w=200&q=80', // 甜点
+      ],
+      beauty: [
+        'photo-1541643600914-78b084683601?w=200&q=80', // 香水/护肤品
+        'photo-1596462502278-27bfdc403348?w=200&q=80', // 化妆品
+      ],
+    };
+
     // 数据
     let PRODUCTS = [
-      { id: 1, name: 'iPhone 15 Pro Max 256GB', category: 'electronics', price: 9999, originalPrice: 10999, stock: 156, status: 'active', sales: 234, image: '📱', desc: '最新款苹果旗舰手机', images: ['📱'], priceHistory: [{date: '2026-03-15', old: 10999, new: 9999, reason: '促销降价'}, {date: '2026-02-01', old: 11999, new: 10999, reason: '正常调整'}] },
-      { id: 2, name: 'Nike Air Jordan 1 High OG', category: 'clothing', price: 1299, originalPrice: 1599, stock: 8, status: 'active', sales: 567, image: '👟', desc: '经典复刻款运动鞋', images: ['👟','👟'], priceHistory: [{date: '2026-04-01', old: 1599, new: 1299, reason: '季末促销'}] },
-      { id: 3, name: '戴森 V15 无线吸尘器', category: 'home', price: 5990, originalPrice: 6490, stock: 45, status: 'active', sales: 123, image: '🧹', desc: '高端家用清洁设备', images: ['🧹'], priceHistory: [] },
-      { id: 4, name: 'SK-II 神仙水 230ml', category: 'beauty', price: 1590, originalPrice: 1790, stock: 234, status: 'active', sales: 892, image: '🧴', desc: '护肤精华液', images: ['🧴','🧴','🧴'], priceHistory: [{date: '2026-03-01', old: 1790, new: 1590, reason: '会员专享价'}] },
-      { id: 5, name: '三只松鼠坚果礼盒', category: 'food', price: 168, originalPrice: 199, stock: 0, status: 'inactive', sales: 1256, image: '🥜', desc: '休闲零食大礼包', images: ['🥜'], priceHistory: [] },
-      { id: 6, name: '索尼 WH-1000XM5 降噪耳机', category: 'electronics', price: 2999, originalPrice: 3299, stock: 78, status: 'active', sales: 145, image: '🎧', desc: '旗舰降噪耳机', images: ['🎧','🎧'], priceHistory: [] },
-      { id: 7, name: '小米智能电视 75英寸', category: 'electronics', price: 4999, originalPrice: 5999, stock: 23, status: 'draft', sales: 0, image: '📺', desc: '大屏智能电视', images: ['📺'], priceHistory: [] },
-      { id: 8, name: 'Lululemon瑜伽裤', category: 'clothing', price: 850, originalPrice: 980, stock: 5, status: 'inactive', sales: 345, image: '🩳', desc: '高品质运动服饰', images: ['🩳'], priceHistory: [] },
+      { id: 1, name: 'iPhone 15 Pro Max 256GB', category: 'electronics', price: 9999, originalPrice: 10999, stock: 156, status: 'active', sales: 234, image: UNSPLASH_BASE + PRODUCT_IMAGES.electronics[0], desc: '最新款苹果旗舰手机', images: [UNSPLASH_BASE + PRODUCT_IMAGES.electronics[0]], priceHistory: [{date: '2026-03-15', old: 10999, new: 9999, reason: '促销降价'}, {date: '2026-02-01', old: 11999, new: 10999, reason: '正常调整'}] },
+      { id: 2, name: 'Nike Air Jordan 1 High OG', category: 'clothing', price: 1299, originalPrice: 1599, stock: 8, status: 'active', sales: 567, image: UNSPLASH_BASE + PRODUCT_IMAGES.clothing[0], desc: '经典复刻款运动鞋', images: [UNSPLASH_BASE + PRODUCT_IMAGES.clothing[0], UNSPLASH_BASE + PRODUCT_IMAGES.clothing[1]], priceHistory: [{date: '2026-04-01', old: 1599, new: 1299, reason: '季末促销'}] },
+      { id: 3, name: '戴森 V15 无线吸尘器', category: 'home', price: 5990, originalPrice: 6490, stock: 45, status: 'active', sales: 123, image: UNSPLASH_BASE + PRODUCT_IMAGES.home[0], desc: '高端家用清洁设备', images: [UNSPLASH_BASE + PRODUCT_IMAGES.home[0]], priceHistory: [] },
+      { id: 4, name: 'SK-II 神仙水 230ml', category: 'beauty', price: 1590, originalPrice: 1790, stock: 234, status: 'active', sales: 892, image: UNSPLASH_BASE + PRODUCT_IMAGES.beauty[0], desc: '护肤精华液', images: [UNSPLASH_BASE + PRODUCT_IMAGES.beauty[0], UNSPLASH_BASE + PRODUCT_IMAGES.beauty[1]], priceHistory: [{date: '2026-03-01', old: 1790, new: 1590, reason: '会员专享价'}] },
+      { id: 5, name: '三只松鼠坚果礼盒', category: 'food', price: 168, originalPrice: 199, stock: 0, status: 'inactive', sales: 1256, image: UNSPLASH_BASE + PRODUCT_IMAGES.food[1], desc: '休闲零食大礼包', images: [UNSPLASH_BASE + PRODUCT_IMAGES.food[1]], priceHistory: [] },
+      { id: 6, name: '索尼 WH-1000XM5 降噪耳机', category: 'electronics', price: 2999, originalPrice: 3299, stock: 78, status: 'active', sales: 145, image: UNSPLASH_BASE + PRODUCT_IMAGES.electronics[1], desc: '旗舰降噪耳机', images: [UNSPLASH_BASE + PRODUCT_IMAGES.electronics[1], UNSPLASH_BASE + PRODUCT_IMAGES.electronics[2]], priceHistory: [] },
+      { id: 7, name: '小米智能电视 75英寸', category: 'electronics', price: 4999, originalPrice: 5999, stock: 23, status: 'draft', sales: 0, image: UNSPLASH_BASE + PRODUCT_IMAGES.electronics[3], desc: '大屏智能电视', images: [UNSPLASH_BASE + PRODUCT_IMAGES.electronics[3]], priceHistory: [] },
+      { id: 8, name: 'Lululemon瑜伽裤', category: 'clothing', price: 850, originalPrice: 980, stock: 5, status: 'inactive', sales: 345, image: UNSPLASH_BASE + PRODUCT_IMAGES.clothing[2], desc: '高品质运动服饰', images: [UNSPLASH_BASE + PRODUCT_IMAGES.clothing[2]], priceHistory: [] },
     ];
 
     let filteredData = [...PRODUCTS];
@@ -476,13 +506,22 @@
     function closeAllModals() { document.getElementById('overlay').classList.add('hidden'); ['drawerListing', 'drawerEdit', 'modalDetail', 'modalPriceHistory', 'modalBatchAction'].forEach(id => document.getElementById(id)?.classList.add('hidden')); }
 
     // 图片上传模拟
-    const SAMPLE_IMAGES = ['📱', '📷', '💻', '🎧', '⌚', '🎮', '📺', '👟', '🧴', '🥜'];
+    const UPLOAD_IMAGES = [
+        'photo-1523275335684-37898b6baf30?w=200&q=80', // 手表
+        'photo-1505740420928-5e560c06d30e?w=200&q=80', // 耳机
+        'photo-1511707171634-5f897ff02aa9?w=200&q=80', // 手机
+        'photo-1542291026-7eec264c27ff?w=200&q=80', // 运动鞋
+        'photo-1541643600914-78b084683601?w=200&q=80', // 香水
+        'photo-1509042239860-f550ce710b93?w=200&q=80', // 坚果
+      ];
+
     function simulateUpload(index) {
       if (uploadedImages[index]) return;
-      uploadedImages[index] = SAMPLE_IMAGES[Math.floor(Math.random() * SAMPLE_IMAGES.length)];
+      const randomImage = UPLOAD_IMAGES[Math.floor(Math.random() * UPLOAD_IMAGES.length)];
+      uploadedImages[index] = UNSPLASH_BASE + randomImage;
       const preview = document.getElementById(`preview${index}`);
       preview.classList.remove('hidden');
-      preview.querySelector('img').src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50' x='50' text-anchor='middle' font-size='50' fill='%2364748b'>${uploadedImages[index]}</text></svg>`;
+      preview.querySelector('img').src = uploadedImages[index];
       preview.parentElement.querySelector('.upload-icon').classList.add('hidden');
       showToast('图片上传成功', 'success');
       lucide.createIcons();
@@ -507,7 +546,7 @@
       if (!name || !category || price <= 0) { showToast('请填写必要信息', 'error'); return; }
       const images = uploadedImages.filter(i => i);
       const newId = Math.max(...PRODUCTS.map(p => p.id)) + 1;
-      PRODUCTS.unshift({ id: newId, name, category, price, originalPrice: price, stock, status, sales: 0, image: images[0] || '📦', desc: document.getElementById('listingDesc').value, images, priceHistory: [] });
+      PRODUCTS.unshift({ id: newId, name, category, price, originalPrice: price, stock, status, sales: 0, image: images[0] || UNSPLASH_BASE + 'photo-1523275335684-37898b6baf30?w=200&q=80', desc: document.getElementById('listingDesc').value, images, priceHistory: [] });
       uploadedImages = [null, null, null, null];
       applyFilters();
       closeDrawer('drawerListing');
@@ -571,11 +610,11 @@
       document.getElementById('detailSales').textContent = p.sales;
       document.getElementById('detailStatus').textContent = STATUS_MAP[p.status].text;
       document.getElementById('detailCategory').textContent = CATEGORY_MAP[p.category];
-      document.getElementById('detailMainImage').textContent = p.image;
+      document.getElementById('detailMainImage').querySelector('img').src = p.image;
 
       // 缩略图
       const thumbs = document.getElementById('detailThumbnails');
-      thumbs.innerHTML = p.images.map((img, i) => `<div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200 ${i === 0 ? 'ring-2 ring-blue-500' : ''}">${img}</div>`).join('');
+      thumbs.innerHTML = p.images.map((img, i) => `<div class="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 ${i === 0 ? 'ring-2 ring-blue-500' : ''}"><img src="${img}" alt="商品图片" class="w-full h-full object-cover"></div>`).join('');
 
       // 价格历史
       const history = document.getElementById('priceHistoryList');
@@ -759,7 +798,7 @@
           tr.className = 'border-b border-slate-100 hover:bg-slate-50/70 transition-colors group';
           tr.innerHTML = `
             <td class="py-4 px-5"><input type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 border-slate-300 rounded" data-id="${p.id}" ${selectedIds.includes(p.id) ? 'checked' : ''} onchange="toggleRowSelect(${p.id})"></td>
-            <td class="py-4 px-5"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200" onclick="openDetailModal(${p.id})">${p.image}</div><div class="min-w-0"><div class="font-medium text-slate-900 truncate max-w-[200px]">${p.name}</div><div class="text-xs text-slate-400 truncate">${p.desc || '暂无描述'}</div></div></div></td>
+            <td class="py-4 px-5"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-80" onclick="openDetailModal(${p.id})"><img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover"></div><div class="min-w-0"><div class="font-medium text-slate-900 truncate max-w-[200px]">${p.name}</div><div class="text-xs text-slate-400 truncate">${p.desc || '暂无描述'}</div></div></div></td>
             <td class="py-4 px-5 text-slate-600">${CATEGORY_MAP[p.category]}</td>
             <td class="py-4 px-5"><div class="flex items-center"><span class="font-medium text-slate-900">¥${p.price}</span>${discount}</div>${p.priceHistory.length > 0 ? `<button onclick="openPriceHistoryModal(${p.id})" class="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-0.5"><i data-lucide="history" class="w-3 h-3"></i>查看历史</button>` : ''}</td>
             <td class="py-4 px-5"><span class="${p.stock === 0 ? 'text-red-500' : p.stock < 10 ? 'text-amber-500' : 'text-slate-600'}">${p.stock}</span>${stockWarning}</td>
