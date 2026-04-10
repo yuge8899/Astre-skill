@@ -84,9 +84,13 @@ Each column is defined as an object:
 
 ### Actions column
 - Always fix right: `fixed: 'right'`
-- Width: 120–160px depending on action count
+- Width: auto (leave enough space for visible actions)
 - Use `ButtonGroup` or `IconButton` for row actions
-- Max 2–3 visible actions — overflow to `MoreHorizontal` menu
+- **Operation rules**:
+  - Operations should not be hidden by default.
+  - Display operations directly to allow users to quickly complete primary tasks.
+  - If there are more than 3 operations, excess operations should be grouped into a `MoreHorizontal` menu to avoid excessive stacking.
+  - Action buttons must use a uniform color (e.g., brand-primary blue) and a normal font weight (400) to avoid visual noise. Do not mix multiple colors like red for delete or gray for edit.
 
 ```tsx
 {
@@ -246,7 +250,7 @@ const [pageSize, setPageSize] = useState(10)
 - Always configure `noDataElement` with a specific empty state
 - Enable `scroll.x` for tables with 6+ columns
 - Batch action bar must appear when rows are selected
-- Maximum 3 visible actions per row — overflow to menu
+- Operations should not be hidden by default. Show up to 3 operations directly. If more than 3, group excess operations into a "More" menu to avoid UI stacking.
 
 ## Anti-patterns
 
@@ -255,5 +259,5 @@ const [pageSize, setPageSize] = useState(10)
 - ❌ Using `pagination={false}` without an external Pagination component
 - ❌ Empty table without `noDataElement`
 - ❌ Spinner instead of `loading={true}`
-- ❌ More than 3 visible action buttons per row
+- ❌ Hiding operations by default when there are 3 or fewer operations
 - ❌ No `fixed: 'right'` on the actions column for wide tables
