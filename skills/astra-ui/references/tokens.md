@@ -301,3 +301,39 @@ surface-hover         → 交互区域悬停状态
 - Surface color contrast is the primary separation tool — not borders
 - Never place form fields directly on the canvas — wrap in a `bg-surface-bg` card
 - Each logical section gets its own `bg-surface-bg rounded-corner-lg p-xl` card
+
+---
+
+## Anti-patterns
+
+### Color
+- ❌ `text-text-primary` 在 `brand-primary` 背景上（应使用 `text-on-brand`）
+- ❌ `brand-primary` 或 `brand-secondary` 作为大面积背景
+- ❌ 页面背景用白色或灰色（应使用 `brand-tertiary`）
+- ❌ 卡片加边框（应使用表面色对比）
+- ❌ 卡片加阴影（阴影仅用于浮动层）
+
+### Spacing
+- ❌ 硬编码像素值（如 `gap-[12px]`、`p-[20px]`）
+- ❌ 卡片或字段之间没有间距（内容不应贴在一起）
+- ❌ 使用不在 scale 中的值（如 5px、10px、15px、18px）
+
+### Radius
+- ❌ 任意圆角值（如 `rounded-[8px]`）
+- ❌ 嵌套元素的圆角比父元素大
+
+### Typography
+- ❌ 使用 Tailwind 默认尺寸类（如 `text-sm`、`text-base`、`text-lg`）
+- ❌ 直接设置 `font-size`
+- ❌ 用 opacity 降低重要性（应使用更小的 type class）
+
+### Elevation
+- ❌ 卡片或面板使用阴影
+- ❌ 导航使用阴影
+- ❌ 透明表面上使用阴影
+
+### Surfaces
+- ❌ 白色/灰色页面背景（应使用 `brand-tertiary`）
+- ❌ 内容直接放在画布上（应包裹在 `surface-bg` 卡片内）
+- ❌ 在已有表面色对比的地方再加边框
+- ❌ `brand-primary` 作为大区块背景

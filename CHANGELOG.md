@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.7.1] - 2026-04-10
+
+### Added
+
+- **Anti-patterns 补充** - 帮助 AI 避免"什么不该做"
+  - components.md: Button、Navigation、Tabs、Table、Pagination、Modal、Badge、Breadcrumb、Form Layout 等
+  - tokens.md: Color、Spacing、Radius、Typography、Elevation、Surfaces
+  - animation.md: 补充 Missing prefers-reduced-motion support
+
+### Benefits
+
+- AI 能知道常见错误并避免
+- 提高生成代码质量
+- 减少 review 修改次数
+
 ## [v1.7.0] - 2026-04-10
 
 ### Changed

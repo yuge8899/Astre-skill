@@ -505,3 +505,61 @@ AI 气泡用 `brand-secondary` 背景
 | `disabled` | `boolean` | — |
 
 **规则**：内置 PromptInput，不再添加单独的输入框。传 ChatBubbles 作为 children。
+
+---
+
+## Anti-patterns
+
+### Button
+- ❌ 每区块多个 `primary` 按钮
+- ❌ 使用不存在的变体：`secondary`、`ghost`、`destructive`
+- ❌ 用 `leftIcon`/`rightIcon`（正确：`iconStart`/`iconEnd`）
+
+### Navigation
+- ❌ 用 Tabs 替代 SidebarNavigation（主导航）
+- ❌ 用 Tabs 替代 SecondaryNav（页面子区块）
+- ❌ 跳过导航层级：SidebarNavigation → Tabs（缺少 SecondaryNav）
+- ❌ SidebarButton 图标不用 `strokeWidth={1.5}` 和 `className="size-full"`
+
+### Tabs
+- ❌ 超过 6 个 tab（应使用 SecondaryNav）
+- ❌ Tab 标签包含图标
+- ❌ Line tabs 嵌套 line tabs
+- ❌ Tab panels 有表格/图表但未启用 lazy rendering
+
+### Table
+- ❌ 没有 Pagination
+- ❌ 缺少 `rowKey` prop
+- ❌ 空表格没有 `noDataElement`
+- ❌ 用 spinner 替代 `loading={true}`
+- ❌ 每行超过 3 个可见操作按钮
+- ❌ 宽表格 Actions 列没有 `fixed: 'right'`
+
+### Pagination
+- ❌ 放在表格卡片外面
+- ❌ 缺少 `total` prop
+- ❌ 全页表格用 `simple` 模式
+- ❌ 改变 pageSize 后没有重置到第 1 页
+
+### Modal
+- ❌ 嵌套 modal
+- ❌ 主操作按钮在左边（应该在右边）
+- ❌ 手动添加遮罩层（Modal 组件内置）
+
+### Badge
+- ❌ 用 children 而不是 `label` prop
+
+### Breadcrumb
+- ❌ 顶级页面使用（Dashboard、根列表）
+- ❌ 最后一项是链接
+- ❌ 虚构不存在的路由层级
+- ❌ 超过 4 个可见项不折叠
+
+### Form Layout
+- ❌ 每个字段单独一个卡片（相关字段应放在同一卡片）
+- ❌ 不相关区块放在同一卡片
+- ❌ 表单内容直接放在画布上（应该放在 `surface-bg` 卡片内）
+
+### General
+- ❌ 使用组件时不知道 Props，应该先查阅文档
+- ❌ 混用不同尺寸的组件（如 Button `medium` 和 `small` 混用）
