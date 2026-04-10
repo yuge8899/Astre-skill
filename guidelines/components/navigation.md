@@ -6,36 +6,11 @@ Navigation rules are semantic Astra rules.
 
 Astra has three levels of navigation. Use them in order — never skip a level.
 
-| Level | Component | Purpose |
-|---|---|---|
-| **Primary** | `SidebarNavigation` + `SidebarButton` | App-level navigation. Always present on every page. |
-| **Secondary** | `SecondaryNav` + `SecondaryNavItem` | Section-level navigation (e.g. Settings sub-sections). |
-| **Tertiary** | `Tabs` | Content-level switching within a section. See [tabs.md](tabs.md). |
-
-## AstraLogo
-
-The `AstraLogo` component renders the Astra brand mark as an inline SVG. It uses `var(--brand-primary)` for the background fill so it adapts to light/dark mode automatically.
-
-| Prop | Type | Default |
-|---|---|---|
-| `size` | `number` | `32` |
-| `className` | `string` | — |
-
-### Usage notes
-
-- Built into `SidebarNavigation` at the top — you do not need to add it manually when using the sidebar
-- Use standalone only for branding outside of navigation (e.g. loading screens, empty states)
-- The `size` prop controls both width and height in pixels
-
-### Example
-
-```tsx
-import { AstraLogo } from '@figma/astraui'
-
-<AstraLogo size={32} />
-```
-
----
+| Level | Component | Width | Purpose |
+|---|---|---|---|
+| **Primary** | `PrimaryNav` + `PrimaryNavItem` | 110px | App-level navigation. Always present on every page. 图标+文字横向排列。 |
+| **Secondary** | `SecondaryNav` + `SecondaryNavItem` | 130px | Section-level navigation (e.g. Orders sub-sections). 纯文字列表。 |
+| **Tertiary** | `Tabs` | — | Content-level switching within a section. See [tabs.md](tabs.md). |
 
 ## Navigation hierarchy decision tree
 
@@ -43,10 +18,10 @@ import { AstraLogo } from '@figma/astraui'
 ┌─ "What navigation component should I use?"
 │
 ├─ App-level navigation (always present)?
-│  └─ SidebarNavigation + SidebarButton (PRIMARY)
+│  └─ PrimaryNav + PrimaryNavItem (PRIMARY) — 110px, 图标+文字横向
 │
-├─ Page sub-sections (settings, detail views)?
-│  └─ SecondaryNav + SecondaryNavItem (SECONDARY)
+├─ Page sub-sections (orders, settings, detail views)?
+│  └─ SecondaryNav + SecondaryNavItem (SECONDARY) — 130px, 纯文字
 │
 └─ Content switching within a section?
    └─ Tabs (TERTIARY) — see tabs.md
@@ -54,27 +29,23 @@ import { AstraLogo } from '@figma/astraui'
 
 ## Layout patterns
 
-**Simple page (no secondary nav):**
+**标准布局：**
 ```
-[ SidebarNavigation 60px ] [ Main content (flex-1) ]
-  surface-bg + border-r       brand-tertiary background
-                               └── surface-bg cards float on top
+[ PrimaryNav 110px ] [ SecondaryNav 130px ] [ Main content (flex-1) ]
+  surface-bg           surface-secondary-bg    brand-tertiary background
+  图标+文字横向          纯文字列表              └── surface-bg cards float on top
+  纵向排列                                     └── Breadcrumb card (64px) 在内容区域内
 ```
 
-**Page with secondary nav:**
-```
-[ SidebarNavigation 60px ] [ SecondaryNav ~252px ] [ Main content (flex-1) ]
-  surface-bg + border-r       surface-secondary-bg    brand-tertiary background
-                               + border-r              └── surface-bg cards float on top
-```
+**重要规则：导航区域之间无边框、无分隔线，用背景色对比区分。**
 
 ---
 
-## SidebarNavigation
+## PrimaryNav
 
 ### When to use
 
-IMPORTANT: Every desktop page MUST include SidebarNavigation. No exceptions — settings pages, empty states, dashboards, editors, error pages all include the sidebar.
+IMPORTANT: Every desktop page MUST include PrimaryNav. No exceptions — settings pages, empty states, dashboards, editors, error pages all include the navigation.
 
 ### Props
 
@@ -86,60 +57,60 @@ IMPORTANT: Every desktop page MUST include SidebarNavigation. No exceptions — 
 
 ### Usage notes
 
-- 60px wide, full height
-- `AstraLogo` is built in at the top
-- `bg-surface-bg` background with `border-r border-border-primary`
-- Pass `SidebarButton` components as **children** — there is NO `navItems` prop
-- Footer items go in the **`footer`** prop — there is NO `bottomNavItems` prop
+- 110px wide, full height
+- `bg-surface-bg` background
+- 导航项纵向排列，每项图标+文字横向排列
+- 无边框、无分隔线
+- Footer items go in the **`footer`** prop
 
 ### Standard configuration
 
 Always use this exact configuration:
 
-- **Primary nav (top):** Home, Film, Book, Folder — all four, in this order
+- **Primary nav items:** 图标+文字横向排列，纵向堆叠
 - **Footer (bottom):** Settings icon + user Avatar — always both present
 - Set `active` on the item matching the current page
 
 ### Example
 
 ```tsx
-import { SidebarNavigation, SidebarButton, Avatar } from '@figma/astraui'
+import { PrimaryNav, PrimaryNavItem, Avatar } from '@figma/astraui'
 import { Home, Film, Book, Folder, Settings } from 'lucide-react'
 
-<SidebarNavigation
+<PrimaryNav
   footer={
     <>
-      <SidebarButton icon={<Settings className="size-full" strokeWidth={1.5} />} />
-      <Avatar type="image" src="/user.jpg" size="medium" shape="circle" />
+      <PrimaryNavItem icon={<Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Settings" />
+      <Avatar type="image" src="/user.jpg" size="small" shape="circle" />
     </>
   }
 >
-  <SidebarButton icon={<Home className="size-full" strokeWidth={1.5} />} active />
-  <SidebarButton icon={<Film className="size-full" strokeWidth={1.5} />} />
-  <SidebarButton icon={<Book className="size-full" strokeWidth={1.5} />} />
-  <SidebarButton icon={<Folder className="size-full" strokeWidth={1.5} />} />
-</SidebarNavigation>
+  <PrimaryNavItem icon={<Home className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Home" />
+  <PrimaryNavItem icon={<Film className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Orders" active />
+  <PrimaryNavItem icon={<Book className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Library" />
+  <PrimaryNavItem icon={<Folder className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Projects" />
+</PrimaryNav>
 ```
 
 ---
 
-## SidebarButton
+## PrimaryNavItem
 
 ### Props
 
 | Prop | Type | Default |
 |---|---|---|
 | `icon` | `ReactNode` | required |
+| `label` | `string` | required |
 | `active` | `boolean` | `false` |
 | `className` | `string` | — |
 
-Also accepts all native `<button>` HTML attributes.
-
 ### Usage notes
 
-- Default state: 50% opacity icon, no background
-- Active state: `brand-tertiary` background, 85% opacity icon
-- Always use `className="size-full"` and `strokeWidth={1.5}` on the icon
+- Default state: `text-text-secondary`, hover: `bg-bg-subtle`
+- Active state: `bg-brand-tertiary` background, `text-brand-primary`
+- 图标 18px，`strokeWidth={1.5}`
+- 图标和文字横向排列：`flex items-center gap-xs`
 
 ---
 
@@ -147,7 +118,7 @@ Also accepts all native `<button>` HTML attributes.
 
 ### When to use
 
-Use SecondaryNav for pages with sub-sections — settings, account pages, detail views. It sits between SidebarNavigation and the main content area.
+Use SecondaryNav for pages with sub-sections — orders, settings, account pages, detail views. It sits between PrimaryNav and the main content area.
 
 ### Props
 
@@ -159,21 +130,21 @@ Use SecondaryNav for pages with sub-sections — settings, account pages, detail
 
 ### Usage notes
 
-- ~252px default width, full height
-- `bg-surface-secondary-bg` background with `border-r border-border-primary`
+- 130px wide, full height
+- `bg-surface-secondary-bg` background
+- 无边框、无分隔线
 - Pass `SecondaryNavItem` components as children
 
 ### Example
 
 ```tsx
 import { SecondaryNav, SecondaryNavItem } from '@figma/astraui'
-import { User, CreditCard, Bell, Video } from 'lucide-react'
 
-<SecondaryNav title="Settings">
-  <SecondaryNavItem icon={<User className="size-full" strokeWidth={1.5} />} label="Profile" active />
-  <SecondaryNavItem icon={<CreditCard className="size-full" strokeWidth={1.5} />} label="Billing" />
-  <SecondaryNavItem icon={<Bell className="size-full" strokeWidth={1.5} />} label="Notifications" />
-  <SecondaryNavItem icon={<Video className="size-full" strokeWidth={1.5} />} label="Media" />
+<SecondaryNav title="Orders">
+  <SecondaryNavItem label="All" active />
+  <SecondaryNavItem label="Pending" />
+  <SecondaryNavItem label="Processing" />
+  <SecondaryNavItem label="Completed" />
 </SecondaryNav>
 ```
 
@@ -185,18 +156,51 @@ import { User, CreditCard, Bell, Video } from 'lucide-react'
 
 | Prop | Type | Default |
 |---|---|---|
-| `icon` | `ReactNode` | required |
 | `label` | `string` | required |
 | `active` | `boolean` | `false` |
 | `className` | `string` | — |
 
-Also accepts all native `<button>` HTML attributes.
-
 ### Usage notes
 
-- Active state: `brand-tertiary` background with `brand-primary` text
-- Inactive state: `text-secondary` with hover to `bg-hover`
-- Always use `className="size-full"` and `strokeWidth={1.5}` on the icon
+- 纯文字，无图标
+- Active state: `bg-brand-tertiary` background with `text-brand-primary`
+- Inactive state: `text-text-secondary` with hover to `bg-bg-subtle`
+
+---
+
+## Breadcrumb
+
+### When to use
+
+Breadcrumb 放在内容区域的卡片内，不是固定在顶部。
+
+### Layout
+
+- `bg-surface-bg rounded-corner-lg px-xl py-md`
+- 高度约 64px（含 padding）
+- 包含面包屑导航和右侧操作按钮（搜索、通知等）
+
+### Example
+
+```tsx
+<div className="bg-surface-bg rounded-corner-lg px-xl py-md mb-xl flex items-center justify-between">
+  <div className="flex items-center gap-sm">
+    <span className="text-text-secondary text-label-sm">Home</span>
+    <ChevronRight className="w-3 h-3 text-text-tertiary" />
+    <span className="text-text-secondary text-label-sm">Orders</span>
+    <ChevronRight className="w-3 h-3 text-text-tertiary" />
+    <span className="text-text-primary text-label-sm font-medium">All Orders</span>
+  </div>
+  <div className="flex items-center gap-lg">
+    <button className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary">
+      <Search className="w-[18px] h-[18px]" />
+    </button>
+    <button className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary">
+      <Bell className="w-[18px] h-[18px]" />
+    </button>
+  </div>
+</div>
+```
 
 ---
 
@@ -204,32 +208,48 @@ Also accepts all native `<button>` HTML attributes.
 
 ```tsx
 <div className="flex h-screen">
-  <SidebarNavigation
+  {/* 一级导航 */}
+  <PrimaryNav
     footer={
       <>
-        <SidebarButton icon={<Settings className="size-full" strokeWidth={1.5} />} />
-        <Avatar type="image" src="/user.jpg" size="medium" shape="circle" />
+        <PrimaryNavItem icon={<Settings className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Settings" />
+        <Avatar type="image" src="/user.jpg" size="small" shape="circle" />
       </>
     }
   >
-    <SidebarButton icon={<Home className="size-full" strokeWidth={1.5} />} />
-    <SidebarButton icon={<Film className="size-full" strokeWidth={1.5} />} />
-    <SidebarButton icon={<Book className="size-full" strokeWidth={1.5} />} />
-    <SidebarButton icon={<Folder className="size-full" strokeWidth={1.5} />} />
-  </SidebarNavigation>
+    <PrimaryNavItem icon={<Home className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Home" />
+    <PrimaryNavItem icon={<Film className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Orders" active />
+    <PrimaryNavItem icon={<Book className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Library" />
+    <PrimaryNavItem icon={<Folder className="w-[18px] h-[18px]" strokeWidth={1.5} />} label="Projects" />
+  </PrimaryNav>
 
-  <SecondaryNav title="Settings">
-    <SecondaryNavItem icon={<User className="size-full" strokeWidth={1.5} />} label="Profile" active />
-    <SecondaryNavItem icon={<CreditCard className="size-full" strokeWidth={1.5} />} label="Billing" />
+  {/* 二级导航 */}
+  <SecondaryNav title="Orders">
+    <SecondaryNavItem label="All" active />
+    <SecondaryNavItem label="Pending" />
+    <SecondaryNavItem label="Processing" />
+    <SecondaryNavItem label="Completed" />
   </SecondaryNav>
 
+  {/* 内容区域 */}
   <main className="flex-1 bg-brand-tertiary p-2xl overflow-y-auto">
-    <h1 className="text-title text-text-primary">Profile</h1>
-    <p className="text-label-sm text-text-secondary mt-xs mb-xl">Manage your personal information</p>
-    <div className="flex flex-col gap-xl max-w-3xl">
-      <div className="bg-surface-bg rounded-corner-lg p-xl">
-        {/* Form content */}
+    {/* 面包屑卡片 */}
+    <div className="bg-surface-bg rounded-corner-lg px-xl py-md mb-xl flex items-center justify-between">
+      <Breadcrumb items={['Home', 'Orders', 'All']} />
+      <div className="flex items-center gap-lg">
+        <button className="w-8 h-8 flex items-center justify-center text-text-secondary">
+          <Search className="w-[18px] h-[18px]" />
+        </button>
+        <button className="w-8 h-8 flex items-center justify-center text-text-secondary">
+          <Bell className="w-[18px] h-[18px]" />
+        </button>
       </div>
+    </div>
+
+    {/* 内容卡片 */}
+    <h1 className="text-title text-text-primary mb-xl">Orders</h1>
+    <div className="bg-surface-bg rounded-corner-lg p-xl">
+      {/* Content */}
     </div>
   </main>
 </div>
@@ -237,7 +257,8 @@ Also accepts all native `<button>` HTML attributes.
 
 ## Rules
 
-- Every desktop page MUST include SidebarNavigation — no exceptions
-- SidebarNavigation and SecondaryNav are separate, side-by-side panels — never combine them
-- Always use the standard four nav items (Home, Film, Book, Folder) and two footer items (Settings, Avatar)
+- Every desktop page MUST include PrimaryNav — no exceptions
+- PrimaryNav and SecondaryNav are separate, side-by-side panels — never combine them
+- 导航区域之间无边框、无分隔线 — 用背景色对比区分
+- Breadcrumb 放在内容区域卡片内，不是固定在顶部
 - Never skip navigation levels — use SecondaryNav for sub-sections, not Tabs

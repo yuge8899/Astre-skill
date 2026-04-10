@@ -1,236 +1,170 @@
-# Color Tokens
+# Color Tokens (Tailwind CSS v4.1.6)
 
-## Color palette overview
+## 颜色系统概述
 
-Astra uses a primarily neutral palette with a branded blue canvas. Brand color (`brand-primary`) is used sparingly — only for primary actions, active states, and small accents.
+Astra 使用 Tailwind CSS v4 内置色板：
+- **Slate** — 中性色（文字、背景、边框）
+- **Blue** — 品牌主色
+- **Blue-700 (#1d4ed8)** — 主题色
 
-| Role | Value (light) | Token | Frequency | Usage |
-|---|---|---|---|---|
-| Blue canvas | `#EBF0FF` | `--brand-tertiary` | **Dominant** | Page background canvas |
-| White surface | `#ffffff` | `--surface-bg` | **Dominant** | Cards, panels, sidebar, elevated content |
-| Black text | `rgba(0,0,0,0.85)` | `--text-primary` | **Dominant** | Primary text |
-| Brand blue | `#2E62FF` | `--brand-primary` | Sparse | Primary buttons, active tabs, progress bars |
-| Dark surface | `#22222c` | `--surface-dark` | Internal | Tooltips, component internals |
+配色原则：~90% 中性表面，品牌色仅用于主操作和激活状态。
 
-The UI is ~90% neutral surfaces (`brand-tertiary` canvas + `surface-bg` cards). Brand color appears only in primary actions, active indicators, and small highlights.
+---
 
-## Naming pattern
+## 品牌色 (Blue)
 
-Astra tokens follow: `--{category}-{role}`
+使用 Tailwind `blue-*` 色板：
 
-- **category**: `brand`, `surface`, `text`, `border`, `bg`
-- **role**: describes the semantic purpose
+| Token | 值 | Tailwind Class | 用途 |
+|-------|-----|----------------|------|
+| `blue-50` | `#eff6ff` | `bg-blue-50` | 最浅背景 |
+| `blue-100` | `#dbeafe` | `bg-blue-100` | **页面画布**、激活背景 |
+| `blue-200` | `#bfdbfe` | `bg-blue-200` | AI 气泡、微妙高亮 |
+| `blue-300` | `#93c5fd` | `bg-blue-300` | — |
+| `blue-400` | `#60a5fa` | `bg-blue-400` | — |
+| `blue-500` | `#3b82f6` | `bg-blue-500` | **主按钮**、激活状态 |
+| `blue-600` | `#2563eb` | `bg-blue-600` | 主按钮悬停 |
+| `blue-700` | `#1d4ed8` | `bg-blue-700` | **主题色**、按下状态 |
+| `blue-800` | `#1e40af` | `bg-blue-800` | — |
+| `blue-900` | `#1e3a8a` | `bg-blue-900` | — |
+| `blue-950` | `#172554` | `bg-blue-950` | 最深 |
 
-| Category | Tokens | Used for |
-|---|---|---|
-| `brand-*` | `primary`, `hover`, `dark`, `secondary`, `tertiary`, `muted` | Brand identity, actions, canvas |
-| `surface-*` | `bg`, `secondary-bg`, `hover`, `dark`, `dark-hover`, `darkest` | Content surfaces, tooltips, component internals |
-| `text-*` | `primary`, `secondary`, `tertiary` | Text hierarchy |
-| `border-*` | `primary`, `secondary`, `selected` | Interactive element borders |
-| `bg-*` | `faint`, `subtle`, `hover` | Background tints within surfaces |
-| `on-*` | `brand`, `reverse` | Text on solid color backgrounds |
-| Status | `success`, `warning`, `danger` | Semantic status indicators |
+**品牌色使用规则**：
+- `blue-500` — 主按钮默认状态
+- `blue-600` — 主按钮悬停
+- `blue-700` — 主题色、按下状态
+- `blue-100` — 页面画布背景
+- `blue-200` — AI 气泡
 
-## Tailwind class mapping
+---
 
-Tokens are mapped to Tailwind via `@theme inline`. Use these classes — never hardcode hex values.
+## 中性色 (Slate)
 
-```
-bg-brand-primary, text-brand-primary, border-brand-primary
-bg-brand-hover, bg-brand-dark, bg-brand-secondary, bg-brand-tertiary, bg-brand-muted
-bg-surface-bg, bg-surface-secondary-bg, bg-surface-hover, bg-surface-dark
-text-text-primary, text-text-secondary, text-text-tertiary
-border-border-primary, border-border-secondary, border-border-selected
-bg-bg-faint, bg-bg-subtle, bg-bg-hover
-text-on-brand, text-on-reverse
-bg-success, bg-warning, bg-danger
-bg-input-bg, bg-modal-scrim
-```
+使用 Tailwind `slate-*` 色板：
 
-## Token values (light mode)
+| Token | 值 | Tailwind Class | 用途 |
+|-------|-----|----------------|------|
+| `slate-50` | `#f8fafc` | `bg-slate-50` | 悬停背景、微妙表面 |
+| `slate-100` | `#f1f5f9` | `bg-slate-100` | 二级背景、输入框 |
+| `slate-200` | `#e2e8f0` | `bg-slate-200` | 边框、分隔线 |
+| `slate-300` | `#cbd5e1` | `bg-slate-300` | 禁用边框 |
+| `slate-400` | `#94a3b8` | `text-slate-400` | 占位符、禁用文字、图标 |
+| `slate-500` | `#64748b` | `text-slate-500` | **次要文字**、描述 |
+| `slate-600` | `#475569` | `text-slate-600` | — |
+| `slate-700` | `#334155` | `text-slate-700` | — |
+| `slate-800` | `#1e293b` | `text-slate-800` | — |
+| `slate-900` | `#0f172a` | `text-slate-900` | **主要文字** |
+| `slate-950` | `#020617` | `text-slate-950` | 最深文字 |
 
-| Token | Value | Notes |
-|---|---|---|
-| `--brand-primary` | `#2E62FF` | Main brand blue — **customizable, change this token to retheme the product** |
-| `--brand-hover` | `#1a4fe0` | Hover state (auto-derived: darken brand-primary ~10%) |
-| `--brand-dark` | `#1B48B8` | Pressed state |
-| `--brand-secondary` | `#D6E3FF` | AI bubble background |
-| `--brand-tertiary` | `#EBF0FF` | Page canvas |
-| `--brand-muted` | `#F0F5FF` | Subtle highlight backgrounds |
+---
 
-## Decision trees
+## 语义色映射
 
-### Background color
+### 背景
 
-```
-┌─ "What background color should I use?"
-│
-├─ Page canvas (main content area)?
-│  └─ bg-brand-tertiary
-│
-├─ Elevated content (card, panel, form container)?
-│  └─ bg-surface-bg
-│
-├─ Sidebar navigation?
-│  └─ bg-surface-bg (with border-r border-border-primary)
-│
-├─ Secondary navigation panel?
-│  └─ bg-surface-secondary-bg
-│
-├─ Recessed area within a card?
-│  └─ bg-bg-faint
-│
-├─ Input field background?
-│  └─ bg-input-bg
-│
-├─ Subtle grouping within a card?
-│  └─ bg-bg-subtle
-│
-├─ Hover state on an interactive region?
-│  └─ bg-surface-hover or bg-bg-hover
-│
-├─ Primary action button?
-│  └─ bg-brand-primary + text-on-brand
-│
-├─ AI chat bubble?
-│  └─ bg-brand-secondary (built into ChatBubbles component)
-│
-├─ Modal backdrop?
-│  └─ bg-modal-scrim
-│
-└─ Status indicator?
-   └─ bg-success, bg-warning, or bg-danger
-```
+| 语义用途 | Tailwind Class |
+|----------|----------------|
+| 页面画布 | `bg-blue-100` |
+| 卡片/面板 | `bg-white` |
+| 一级导航 | `bg-white` |
+| 二级导航 | `bg-slate-100` |
+| 输入框 | `bg-slate-100` |
+| 悬停状态 | `bg-slate-50` |
+| AI 气泡 | `bg-blue-200` |
 
-### Text color
+### 文字
 
-```
-┌─ "What text color should I use?"
-│
-├─ PRIMARY content users must read?
-│  └─ text-text-primary
-│
-├─ SUPPORTING information (descriptions, helper text, timestamps)?
-│  └─ text-text-secondary
-│
-├─ DECORATIVE or very low priority (placeholders, disabled labels)?
-│  └─ text-text-tertiary
-│
-├─ Interactive text (active tab label, link)?
-│  └─ text-brand-primary
-│
-├─ Text on brand-primary background?
-│  └─ text-on-brand (always white)
-│
-├─ Status text?
-│  └─ text-danger, text-success, text-warning
-│
-└─ Element that must stay dark in both modes?
-   └─ text-on-reverse
-```
+| 语义用途 | Tailwind Class |
+|----------|----------------|
+| 主要文字 | `text-slate-900` |
+| 次要文字 | `text-slate-500` |
+| 占位符/禁用 | `text-slate-400` |
+| 品牌色背景上 | `text-white` |
+| 激活/交互文字 | `text-blue-700` |
 
-### Border color
+### 边框
+
+| 语义用途 | Tailwind Class |
+|----------|----------------|
+| 默认边框 | `border-slate-200` |
+| 微妙边框 | `border-slate-100` |
+| 聚焦/选中 | `border-blue-500` |
+
+---
+
+## 状态色
+
+| 状态 | 文字 | 背景 |
+|------|------|------|
+| 成功 | `text-green-600` | `bg-green-50` |
+| 警告 | `text-amber-600` | `bg-amber-50` |
+| 错误 | `text-red-600` | `bg-red-50` |
+| 信息 | `text-blue-600` | `bg-blue-50` |
+
+---
+
+## 决策树
+
+### 背景色
 
 ```
-┌─ "What border color should I use?"
+┌─ "What background color?"
 │
-├─ Default interactive element (input, select, clickable card)?
-│  └─ border-border-primary
-│
-├─ Subtle separator (secondary divider, card edge)?
-│  └─ border-border-secondary
-│
-├─ Focused or selected element?
-│  └─ border-border-selected
-│
-└─ Layout region boundary?
-   └─ No border — use surface color contrast instead
-      Exception: SidebarNavigation uses border-r border-border-primary
+├─ 页面画布？→ bg-blue-100
+├─ 卡片/面板？→ bg-white
+├─ 一级导航？→ bg-white
+├─ 二级导航？→ bg-slate-100
+├─ 输入框？→ bg-slate-100
+├─ 悬停状态？→ bg-slate-50
+├─ 主按钮？→ bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700
+├─ AI 气泡？→ bg-blue-200
+└─ 边框？→ border-slate-200
 ```
 
-### Icon color
+### 文字色
 
 ```
-Icons inherit text color via currentColor. Follow the text hierarchy:
-├─ Primary → text-text-primary (default via currentColor)
-├─ Secondary → text-text-secondary
-├─ On brand background → text-on-brand
-├─ Active/selected → text-brand-primary
-└─ Status → text-danger, text-success, text-warning
+┌─ "What text color?"
+│
+├─ 主要内容？→ text-slate-900
+├─ 次要文字（描述）？→ text-slate-500
+├─ 占位符/禁用？→ text-slate-400
+├─ 激活/交互？→ text-blue-700
+├─ 品牌色背景上？→ text-white
+└─ 状态？→ text-green-600 / text-amber-600 / text-red-600
 ```
 
-## Token usage by element type
+---
 
-### Buttons
-- Primary: `bg-brand-primary` background, `text-on-brand` text
-- Neutral: `bg-surface-bg` background, `text-text-primary` text, `border-border-primary` border
-- Subtle: transparent background, `text-text-primary` text
-
-### Text
-- Body text: `text-text-primary`
-- Descriptions, metadata: `text-text-secondary`
-- Placeholders: `text-text-tertiary`
-- Active tab, link: `text-brand-primary`
-- Error message: `text-danger`
-
-### Surfaces
-- Page canvas: `bg-brand-tertiary`
-- Elevated cards/panels: `bg-surface-bg`
-- Sidebar: `bg-surface-bg` with `border-r border-border-primary`
-- Recessed areas: `bg-bg-faint` or `bg-bg-subtle`
-- Tooltips: `bg-surface-dark` (component internal)
-
-### Icons
-- Default: inherits `currentColor` from parent text color
-- Active sidebar item: 85% opacity via component
-- Status: `text-danger`, `text-success`
-
-## Common mistake: "on-" roles
-
-Use `on-brand` for text on solid brand backgrounds:
+## 常见错误
 
 ```tsx
-{/* CORRECT — white text on brand background */}
-<div className="bg-brand-primary text-on-brand">Save</div>
+// ❌ 错误：text-slate-900 在 blue-500 背景上不可见
+<button className="bg-blue-500 text-slate-900">Save</button>
 
-{/* WRONG — primary text disappears on brand background */}
-<div className="bg-brand-primary text-text-primary">Save</div>
+// ✅ 正确：使用 text-white
+<button className="bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700">Save</button>
+
+// ❌ 错误：页面背景用白色
+<main className="bg-white">
+
+// ✅ 正确：页面背景用 blue-100
+<main className="bg-blue-100">
+
+// ❌ 错误：硬编码颜色
+<div className="bg-[#3b82f6]">
+
+// ✅ 正确：使用 Tailwind 色板
+<div className="bg-blue-500">
 ```
 
-`on-reverse` (`#1e1e1e`) is for elements that must stay dark in both light and dark modes — e.g., the dot separator in `ItemCard` metadata.
+---
 
-## Common mistake: brand color overuse
+## 规则
 
-IMPORTANT: `brand-primary` and `brand-secondary` are for small accents only. Never use them as backgrounds for cards, panels, sections, or large areas.
-
-```tsx
-{/* CORRECT — brand on a button */}
-<Button variant="primary">Save</Button>
-
-{/* WRONG — brand as a section background */}
-<div className="bg-brand-primary p-xl">
-  <h2>Welcome</h2>
-</div>
-```
-
-## Theme customization
-
-The product's visual theme is driven by `--brand-primary`. To retheme:
-
-1. Change `--brand-primary` in the CSS token file
-2. Derive hover/dark states by darkening 10% and 20%:
-   - `--brand-hover` = darken 10%
-   - `--brand-dark` = darken 20%
-3. Do **not** change `--brand-tertiary` independently — it must remain a very light tint of brand-primary (≥90% lightness)
-
-```css
-/* Example: change to ocean blue */
-:root {
-  --brand-primary: #2E62FF;   /* ← change this */
-  --brand-hover:   #1a4fe0;   /* darken ~10% */
-  --brand-dark:    #1040c0;   /* darken ~20% */
-  --brand-tertiary: #f0f4ff;  /* very light tint */
-}
-```
-
-All components that use `bg-brand-primary`, `text-brand-primary`, and `border-border-selected` will automatically reflect the new color.
+1. **使用 Tailwind 内置色板** — `blue-*` 和 `slate-*`
+2. **90% 中性表面** — `white` + `slate-*`
+3. **品牌色仅用于主操作** — `blue-500/600/700`
+4. **页面画布用 blue-100**
+5. **卡片用纯白**
+6. **无边框设计** — 用表面色对比分隔
