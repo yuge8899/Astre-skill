@@ -2,10 +2,16 @@
 
 Astra UI 设计系统技能包，用于生成符合 Astra 规范的 UI 页面。
 
+## 当前版本
+
+**v1.7.0** - Progressive Disclosure 架构
+
 ## 版本历史
 
 | 版本 | 日期 | 更新内容 |
 |------|------|----------|
+| v1.7.0 | 2026-04-10 | Progressive Disclosure 架构，SKILL.md 精简 + references/ 分离 |
+| v1.6.0 | 2026-04-10 | 完整 Guidelines 内容嵌入 |
 | v1.5.0 | 2026-04-10 | Design Tokens 完整体系 + Guidelines 按需读取指引 |
 | v1.4.0 | 2026-04-10 | shadcn/ui 组件安装清单，按类别分组 |
 | v1.3.0 | 2026-04-10 | 使用 shadcn/ui Chart 组件，保持 Astra 极简配色 |
@@ -40,53 +46,20 @@ ln -sf /path/to/Astre-skill/skills/astra-ui ~/.claude/skills/astra-ui
 ```
 Astre-skill/
 ├── README.md
-├── CHANGELOG.md              # 版本变更记录
+├── CHANGELOG.md
 ├── skills/
 │   └── astra-ui/
-│       └── SKILL.md          # 主技能文件
-└── guidelines/               # 详细规则文档
-    ├── overview.md           # 系统概览
-    ├── setup.md              # 依赖配置
-    ├── icon-discovery.md     # 图标查找
-    ├── components/           # 组件规则
-    │   ├── button.md
-    │   ├── input.md
-    │   ├── navigation.md
-    │   └── ...
-    ├── foundations/          # 基础 Token
-    │   ├── color.md
-    │   ├── spacing.md
-    │   ├── typography.md
-    │   └── ...
-    └── composition/          # 布局组合
-        ├── layouts.md
-        ├── page-templates.md
-        └── ...
+│       ├── SKILL.md          # 主技能文件 (235行)
+│       └── references/       # 按需读取的详细规则
+│           ├── tokens.md     # Design Tokens
+│           ├── components.md # 组件 Props
+│           ├── templates.md  # 页面模板
+│           ├── animation.md  # 动画规则
+│           ├── modes.md      # 暗色模式
+│           ├── focus.md      # 焦点样式
+│           └── icons.md      # 图标规则
+└── guidelines/               # 原始规则文档
 ```
-
-## 包含内容
-
-### 技能 (SKILL.md)
-
-- **设计原则**：极简配色、卡片式布局、无边框设计
-- **Design Tokens**：Spacing、Color、Radius、Typography、Elevation、Surfaces
-- **硬规则**：12 条强制规则
-- **页面模板**：5 个标准模板
-  - Dashboard
-  - Analytics Dashboard（含图表）
-  - Data List / Management
-  - Detail / Editor
-  - Form / Settings
-- **决策树**：Layout、Component 选择逻辑
-- **验证 Checklist**：Critical / Major / Minor 分层
-- **图表组件**：shadcn/ui Chart + Astra 配色
-- **按需读取指引**：Guidelines 文件映射表
-
-### 规则文档 (guidelines/)
-
-- **16 个组件规则**：Button, Input, Navigation, Table, Modal 等
-- **10 个基础规则**：Color, Spacing, Typography, Animation 等
-- **6 个组合规则**：Layouts, Page Templates, Hierarchy 等
 
 ## 设计系统特点
 
