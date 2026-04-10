@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.4.0] - 2026-04-10
+
+### Added
+
+- **shadcn/ui 组件安装清单** - 完整的组件依赖安装指南
+  - 一键安装全部组件命令
+  - 按类别分组的安装命令（布局、按钮、输入、反馈、弹层、数据、导航、图表）
+  - 图标库安装命令
+  - 组件使用示例代码
+
 ## [v1.3.0] - 2026-04-10
 
 ### Changed
