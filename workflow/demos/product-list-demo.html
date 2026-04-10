@@ -13,13 +13,8 @@
     tailwind.config = {
       theme: {
         extend: {
-          spacing: {
-            '5': '1.25rem',
-          },
-          borderRadius: {
-            'md': '0.5rem',
-            'xl': '1rem',
-          },
+          spacing: { '5': '1.25rem' },
+          borderRadius: { 'md': '0.5rem', 'xl': '1rem' },
         }
       }
     }
@@ -31,15 +26,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    body {
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
+    body { font-family: 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
     .drawer-slide-in { animation: slideIn 0.3s ease-out; }
     @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     .modal-fade-in { animation: fadeIn 0.2s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+    .image-preview { transition: all 0.3s ease; }
+    .image-preview:hover .delete-btn { opacity: 1; }
   </style>
 
   <!-- Lucide Icons -->
@@ -47,18 +40,25 @@
 </head>
 <body class="flex h-screen overflow-hidden text-slate-900 bg-slate-50">
 
-  <!-- ==================== 全局组件 ==================== -->
-
-  <!-- Toast -->
+  <!-- ==================== Toast ==================== -->
   <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg text-sm z-[100] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-10px]">
     <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
     <span id="toast-msg">提示消息</span>
   </div>
 
+  <!-- 库存预警提示条 -->
+  <div id="stockWarning" class="fixed top-6 right-6 bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-xl shadow-sm text-sm z-[99] flex items-center gap-3 transition-all duration-300 opacity-0 pointer-events-none hidden">
+    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
+    <span id="stockWarningMsg">有商品库存不足</span>
+    <button onclick="closeStockWarning()" class="text-amber-500 hover:text-amber-600">
+      <i data-lucide="x" class="w-4 h-4"></i>
+    </button>
+  </div>
+
   <!-- 遮罩层 -->
   <div id="overlay" class="fixed inset-0 bg-black/50 z-[90] hidden transition-opacity" onclick="closeAllModals()"></div>
 
-  <!-- ==================== 抽屉：上架商品 ==================== -->
+  <!-- ==================== 抽屉：上架商品（含图片上传） ==================== -->
   <div id="drawerListing" class="fixed right-0 top-0 h-full w-[560px] bg-white shadow-2xl z-[95] hidden drawer-slide-in">
     <div class="h-full flex flex-col">
       <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
@@ -76,7 +76,7 @@
           <!-- 商品名称 -->
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">商品名称 <span class="text-red-500">*</span></label>
-            <input id="listingName" type="text" placeholder="请输入商品名称" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400">
+            <input id="listingName" type="text" placeholder="请输入商品名称" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
           </div>
 
           <!-- 商品分类 -->
@@ -92,24 +92,49 @@
             </select>
           </div>
 
-          <!-- 商品图片 -->
+          <!-- 商品图片（带上传预览功能） -->
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">商品图片</label>
-            <div class="flex gap-3">
-              <div class="w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer">
-                <i data-lucide="plus" class="w-5 h-5"></i>
+            <div id="imageUploadArea" class="flex gap-3">
+              <!-- 图片预览容器 -->
+              <div class="image-preview relative w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer overflow-hidden" onclick="simulateUpload(0)">
+                <div id="preview0" class="hidden absolute inset-0">
+                  <img class="w-full h-full object-cover" alt="">
+                  <div class="delete-btn absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-opacity">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-white"></i>
+                  </div>
+                </div>
+                <i data-lucide="plus" class="w-5 h-5 upload-icon"></i>
               </div>
-              <div class="w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer">
-                <i data-lucide="plus" class="w-5 h-5"></i>
+              <div class="image-preview relative w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer overflow-hidden" onclick="simulateUpload(1)">
+                <div id="preview1" class="hidden absolute inset-0">
+                  <img class="w-full h-full object-cover" alt="">
+                  <div class="delete-btn absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-opacity cursor-pointer" onclick="removeImage(1)">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-white"></i>
+                  </div>
+                </div>
+                <i data-lucide="plus" class="w-5 h-5 upload-icon"></i>
               </div>
-              <div class="w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer">
-                <i data-lucide="plus" class="w-5 h-5"></i>
+              <div class="image-preview relative w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer overflow-hidden" onclick="simulateUpload(2)">
+                <div id="preview2" class="hidden absolute inset-0">
+                  <img class="w-full h-full object-cover" alt="">
+                  <div class="delete-btn absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-opacity cursor-pointer" onclick="removeImage(2)">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-white"></i>
+                  </div>
+                </div>
+                <i data-lucide="plus" class="w-5 h-5 upload-icon"></i>
               </div>
-              <div class="w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer">
-                <i data-lucide="plus" class="w-5 h-5"></i>
+              <div class="image-preview relative w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:border-blue-400 hover:text-blue-400 transition-colors cursor-pointer overflow-hidden" onclick="simulateUpload(3)">
+                <div id="preview3" class="hidden absolute inset-0">
+                  <img class="w-full h-full object-cover" alt="">
+                  <div class="delete-btn absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 transition-opacity cursor-pointer" onclick="removeImage(3)">
+                    <i data-lucide="trash-2" class="w-5 h-5 text-white"></i>
+                  </div>
+                </div>
+                <i data-lucide="plus" class="w-5 h-5 upload-icon"></i>
               </div>
             </div>
-            <p class="text-xs text-slate-400 mt-2">最多上传4张图片，支持 jpg、png 格式</p>
+            <p class="text-xs text-slate-400 mt-2">最多上传4张图片，点击模拟上传，支持 jpg、png</p>
           </div>
 
           <!-- 价格与库存 -->
@@ -118,55 +143,19 @@
               <label class="block text-sm font-medium text-slate-700 mb-2">售价 <span class="text-red-500">*</span></label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">¥</span>
-                <input id="listingPrice" type="number" placeholder="0.00" min="0" step="0.01" class="w-full bg-slate-100 rounded-md py-2.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
+                <input id="listingPrice" type="number" placeholder="0.00" min="0" step="0.01" class="w-full bg-slate-100 rounded-md py-2.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900">
               </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">库存数量 <span class="text-red-500">*</span></label>
-              <input id="listingStock" type="number" placeholder="0" min="0" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
-            </div>
-          </div>
-
-          <!-- 市场价（可选） -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">市场价（原价）</label>
-            <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">¥</span>
-              <input id="listingOriginalPrice" type="number" placeholder="0.00" min="0" step="0.01" class="w-full bg-slate-100 rounded-md py-2.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
-            </div>
-            <p class="text-xs text-slate-400 mt-2">用于显示折扣力度</p>
-          </div>
-
-          <!-- 商品规格 -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">商品规格</label>
-            <div id="specContainer" class="flex flex-col gap-2">
-              <div class="flex gap-2 items-center">
-                <input type="text" placeholder="规格名称（如：颜色）" class="w-32 bg-slate-100 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
-                <input type="text" placeholder="规格值（如：红色、蓝色）" class="flex-1 bg-slate-100 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
-                <button onclick="addSpecRow()" class="w-8 h-8 rounded-md bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 flex items-center justify-center transition-colors">
-                  <i data-lucide="plus" class="w-4 h-4"></i>
-                </button>
-              </div>
+              <input id="listingStock" type="number" placeholder="0" min="0" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900">
             </div>
           </div>
 
           <!-- 商品描述 -->
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">商品描述</label>
-            <textarea id="listingDesc" placeholder="详细描述商品特点、材质、用途等信息" rows="4" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 transition-all text-slate-900 placeholder:text-slate-400 resize-none"></textarea>
-          </div>
-
-          <!-- 商品标签 -->
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">商品标签</label>
-            <div class="flex flex-wrap gap-2">
-              <button onclick="toggleTag(this)" class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-md hover:bg-slate-200 transition-colors">新品首发</button>
-              <button onclick="toggleTag(this)" class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-md hover:bg-slate-200 transition-colors">热销爆款</button>
-              <button onclick="toggleTag(this)" class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-md hover:bg-slate-200 transition-colors">限时特惠</button>
-              <button onclick="toggleTag(this)" class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-md hover:bg-slate-200 transition-colors">会员专享</button>
-              <button onclick="toggleTag(this)" class="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs rounded-md hover:bg-slate-200 transition-colors">海外购</button>
-            </div>
+            <textarea id="listingDesc" placeholder="详细描述商品特点" rows="3" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 resize-none"></textarea>
           </div>
 
           <!-- 上架状态 -->
@@ -174,11 +163,11 @@
             <label class="block text-sm font-medium text-slate-700 mb-2">上架状态</label>
             <div class="flex gap-4">
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="listingStatus" value="active" checked class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500">
+                <input type="radio" name="listingStatus" value="active" checked class="w-4 h-4 text-blue-600 border-slate-300">
                 <span class="text-sm text-slate-600">立即上架</span>
               </label>
               <label class="flex items-center gap-2 cursor-pointer">
-                <input type="radio" name="listingStatus" value="draft" class="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500">
+                <input type="radio" name="listingStatus" value="draft" class="w-4 h-4 text-blue-600 border-slate-300">
                 <span class="text-sm text-slate-600">暂存草稿</span>
               </label>
             </div>
@@ -187,8 +176,8 @@
       </div>
 
       <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
-        <button onclick="closeDrawer('drawerListing')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
-        <button onclick="submitListing()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20 flex items-center gap-1.5">
+        <button onclick="closeDrawer('drawerListing')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50">取消</button>
+        <button onclick="submitListing()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 shadow-sm shadow-blue-600/20 flex items-center gap-1.5">
           <i data-lucide="check" class="w-4 h-4"></i>
           确认上架
         </button>
@@ -197,271 +186,187 @@
   </div>
 
   <!-- ==================== 抽屉：编辑商品 ==================== -->
-  <div id="drawerEdit" class="fixed right-0 top-0 h-full w-[560px] bg-white shadow-2xl z-[95] hidden drawer-slide-in">
+  <div id="drawerEdit" class="fixed right-0 top-0 h-full w-[480px] bg-white shadow-2xl z-[95] hidden drawer-slide-in">
     <div class="h-full flex flex-col">
       <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-semibold text-slate-900">编辑商品</h2>
           <p class="text-sm text-slate-500 mt-0.5" id="editHint">修改商品信息</p>
         </div>
-        <button onclick="closeDrawer('drawerEdit')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+        <button onclick="closeDrawer('drawerEdit')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
+      <div class="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+        <div><label class="block text-sm font-medium text-slate-700 mb-2">商品名称</label><input id="editName" type="text" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900"></div>
+        <div><label class="block text-sm font-medium text-slate-700 mb-2">商品分类</label><select id="editCategory" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700"><option value="electronics">电子产品</option><option value="clothing">服装配饰</option><option value="home">家居用品</option><option value="food">食品饮料</option><option value="beauty">美妆护肤</option></select></div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-sm font-medium text-slate-700 mb-2">售价</label><div class="relative"><span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">¥</span><input id="editPrice" type="number" min="0" step="0.01" class="w-full bg-slate-100 rounded-md py-2.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900"></div></div>
+          <div><label class="block text-sm font-medium text-slate-700 mb-2">库存</label><input id="editStock" type="number" min="0" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900"></div>
+        </div>
+        <div><label class="block text-sm font-medium text-slate-700 mb-2">商品描述</label><textarea id="editDesc" rows="3" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 resize-none"></textarea></div>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
+        <button onclick="closeDrawer('drawerEdit')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50">取消</button>
+        <button onclick="submitEdit()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 shadow-sm shadow-blue-600/20">保存修改</button>
+      </div>
+    </div>
+  </div>
 
+  <!-- ==================== 弹窗：商品详情 ==================== -->
+  <div id="modalDetail" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-[640px] max-h-[85vh] flex flex-col modal-fade-in">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-slate-900">商品详情</h2>
+        <button onclick="closeModal('modalDetail')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
       <div class="flex-1 overflow-y-auto p-6">
-        <div class="flex flex-col gap-5">
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">商品名称</label>
-            <input id="editName" type="text" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900">
+        <div class="flex gap-6 mb-6">
+          <!-- 商品图片 -->
+          <div id="detailImages" class="w-[240px] shrink-0">
+            <div class="aspect-square bg-slate-100 rounded-xl mb-2 flex items-center justify-center text-4xl" id="detailMainImage">📱</div>
+            <div class="grid grid-cols-4 gap-2" id="detailThumbnails"></div>
           </div>
-
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">商品分类</label>
-            <select id="editCategory" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700">
-              <option value="electronics">电子产品</option>
-              <option value="clothing">服装配饰</option>
-              <option value="home">家居用品</option>
-              <option value="food">食品饮料</option>
-              <option value="beauty">美妆护肤</option>
-            </select>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">售价</label>
-              <div class="relative">
-                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">¥</span>
-                <input id="editPrice" type="number" min="0" step="0.01" class="w-full bg-slate-100 rounded-md py-2.5 pl-8 pr-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900">
-              </div>
+          <!-- 商品信息 -->
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-slate-900 mb-2" id="detailName">商品名称</h3>
+            <p class="text-sm text-slate-500 mb-4" id="detailDesc">商品描述</p>
+            <div class="flex items-center gap-3 mb-4">
+              <span class="text-2xl font-bold text-slate-900" id="detailPrice">¥0</span>
+              <span class="text-sm text-slate-400" id="detailOriginalPrice">原价 ¥0</span>
+              <span class="bg-red-50 text-red-500 px-2 py-0.5 rounded text-xs font-medium" id="detailDiscount">-0%</span>
             </div>
-            <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">库存</label>
-              <input id="editStock" type="number" min="0" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900">
+            <div class="flex items-center gap-4 mb-4 text-sm">
+              <span class="text-slate-500">库存: <span class="text-slate-900 font-medium" id="detailStock">0</span></span>
+              <span class="text-slate-500">销量: <span class="text-slate-900 font-medium" id="detailSales">0</span></span>
+              <span class="bg-green-50 text-green-600 px-2 py-0.5 rounded text-xs" id="detailStatus">已上架</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-slate-500">
+              <span>分类:</span>
+              <span class="text-slate-700" id="detailCategory">电子产品</span>
             </div>
           </div>
-
-          <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">商品描述</label>
-            <textarea id="editDesc" rows="3" class="w-full bg-slate-100 rounded-md py-2.5 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 resize-none"></textarea>
-          </div>
+        </div>
+        <!-- 价格历史 -->
+        <div class="border-t border-slate-100 pt-4">
+          <h4 class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2"><i data-lucide="history" class="w-4 h-4"></i>价格调整历史</h4>
+          <div id="priceHistoryList" class="flex flex-col gap-2"></div>
         </div>
       </div>
-
       <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
-        <button onclick="closeDrawer('drawerEdit')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
-        <button onclick="submitEdit()" class="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 transition-colors shadow-sm shadow-blue-600/20">保存修改</button>
+        <button onclick="closeModal('modalDetail')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50">关闭</button>
+        <button onclick="copyProduct()" class="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-700 shadow-sm shadow-blue-600/20 flex items-center gap-1.5"><i data-lucide="copy" class="w-4 h-4"></i>复制商品</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 弹窗：批量上架 ==================== -->
-  <div id="modalBatchListing" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-[400px] modal-fade-in">
-      <div class="px-6 py-5 border-b border-slate-100">
-        <h2 class="text-lg font-semibold text-slate-900">批量上架</h2>
+  <!-- ==================== 弹窗：价格调整历史 ==================== -->
+  <div id="modalPriceHistory" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-[480px] modal-fade-in">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div><h2 class="text-lg font-semibold text-slate-900">价格调整历史</h2><p class="text-sm text-slate-500 mt-0.5" id="priceHistoryHint">查看历史价格变化</p></div>
+        <button onclick="closeModal('modalPriceHistory')" class="w-8 h-8 rounded-md flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
+      <div class="px-6 py-5 max-h-[400px] overflow-y-auto">
+        <div id="priceHistoryContent" class="flex flex-col gap-3"></div>
+      </div>
+      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end">
+        <button onclick="closeModal('modalPriceHistory')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗：批量上架/下架/删除 ==================== -->
+  <div id="modalBatchAction" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-[400px] modal-fade-in">
+      <div class="px-6 py-5 border-b border-slate-100"><h2 class="text-lg font-semibold text-slate-900" id="batchActionTitle">批量操作</h2></div>
       <div class="px-6 py-5">
         <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-green-50 text-green-500 flex items-center justify-center shrink-0">
-            <i data-lucide="arrow-up-circle" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <p class="text-sm text-slate-600">确定要上架选中的 <span id="batchListingCount" class="font-semibold text-green-600">0</span> 个商品吗？</p>
-            <p class="text-xs text-slate-400 mt-2">上架后商品将立即对外销售</p>
-          </div>
+          <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" id="batchActionIcon"><i data-lucide="arrow-up-circle" class="w-5 h-5"></i></div>
+          <div><p class="text-sm text-slate-600" id="batchActionMsg">确定执行此操作？</p><p class="text-xs text-slate-400 mt-2" id="batchActionHint">操作提示</p></div>
         </div>
       </div>
       <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
-        <button onclick="closeModal('modalBatchListing')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
-        <button onclick="confirmBatchListing()" class="px-5 py-2 bg-green-600 text-white text-sm font-semibold rounded-md hover:bg-green-700 transition-colors shadow-sm shadow-green-600/20">确认上架</button>
+        <button onclick="closeModal('modalBatchAction')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50">取消</button>
+        <button onclick="confirmBatchAction()" class="px-5 py-2 text-white text-sm font-semibold rounded-md shadow-sm" id="batchActionBtn">确认</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 弹窗：批量下架 ==================== -->
-  <div id="modalBatchDelisting" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-[400px] modal-fade-in">
-      <div class="px-6 py-5 border-b border-slate-100">
-        <h2 class="text-lg font-semibold text-slate-900">批量下架</h2>
-      </div>
-      <div class="px-6 py-5">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
-            <i data-lucide="arrow-down-circle" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <p class="text-sm text-slate-600">确定要下架选中的 <span id="batchDelistingCount" class="font-semibold text-amber-600">0</span> 个商品吗？</p>
-            <p class="text-xs text-slate-400 mt-2">下架后商品将暂停销售，库存保留</p>
-          </div>
-        </div>
-      </div>
-      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
-        <button onclick="closeModal('modalBatchDelisting')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
-        <button onclick="confirmBatchDelisting()" class="px-5 py-2 bg-amber-600 text-white text-sm font-semibold rounded-md hover:bg-amber-700 transition-colors shadow-sm shadow-amber-600/20">确认下架</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== 弹窗：删除确认 ==================== -->
-  <div id="modalDelete" class="fixed inset-0 z-[95] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-[400px] modal-fade-in">
-      <div class="px-6 py-5 border-b border-slate-100">
-        <h2 class="text-lg font-semibold text-slate-900">删除商品</h2>
-      </div>
-      <div class="px-6 py-5">
-        <div class="flex items-start gap-4">
-          <div class="w-10 h-10 rounded-full bg-red-50 text-red-500 flex items-center justify-center shrink-0">
-            <i data-lucide="trash-2" class="w-5 h-5"></i>
-          </div>
-          <div>
-            <p class="text-sm text-slate-600" id="deleteMsg">确定要删除该商品吗？</p>
-            <p class="text-xs text-slate-400 mt-2">删除后无法恢复，相关订单数据将保留</p>
-          </div>
-        </div>
-      </div>
-      <div class="px-6 py-4 border-t border-slate-100 flex items-center justify-end gap-3">
-        <button onclick="closeModal('modalDelete')" class="px-4 py-2 border border-slate-200 text-slate-600 text-sm font-medium rounded-md hover:bg-slate-50 transition-colors">取消</button>
-        <button onclick="confirmDelete()" class="px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-md hover:bg-red-700 transition-colors shadow-sm shadow-red-600/20">确认删除</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== 主布局 ==================== -->
-
-  <!-- 一级导航 -->
+  <!-- ==================== 一级导航 ==================== -->
   <nav class="w-[110px] bg-slate-900 flex flex-col pt-6 shrink-0 z-20">
-    <div class="px-3 mb-8 flex justify-center">
-      <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold shadow-sm">A</div>
-    </div>
-
+    <div class="px-3 mb-8 flex justify-center"><div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold shadow-sm">A</div></div>
     <div class="flex flex-col gap-1 px-2">
-      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
-        <i data-lucide="home" class="w-4 h-4 shrink-0"></i>
-        <span class="text-[13px] font-medium">首页</span>
-      </a>
-      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg bg-blue-600 text-white transition-colors whitespace-nowrap overflow-hidden shadow-md shadow-blue-900/50">
-        <i data-lucide="package" class="w-4 h-4 shrink-0"></i>
-        <span class="text-[13px] font-medium">商品</span>
-      </a>
-      <a href="product-tags-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
-        <i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i>
-        <span class="text-[13px] font-medium">订单</span>
-      </a>
-      <a href="scrm-dashboard-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
-        <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
-        <span class="text-[13px] font-medium">SCRM</span>
-      </a>
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 whitespace-nowrap overflow-hidden"><i data-lucide="home" class="w-4 h-4 shrink-0"></i><span class="text-[13px] font-medium">首页</span></a>
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg bg-blue-600 text-white whitespace-nowrap overflow-hidden shadow-md shadow-blue-900/50"><i data-lucide="package" class="w-4 h-4 shrink-0"></i><span class="text-[13px] font-medium">商品</span></a>
+      <a href="product-tags-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 whitespace-nowrap overflow-hidden"><i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i><span class="text-[13px] font-medium">订单</span></a>
+      <a href="scrm-dashboard-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 whitespace-nowrap overflow-hidden"><i data-lucide="users" class="w-4 h-4 shrink-0"></i><span class="text-[13px] font-medium">SCRM</span></a>
     </div>
-
-    <div class="mt-auto mb-6 px-2">
-      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
-        <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
-        <span class="text-[13px] font-medium">设置</span>
-      </a>
-    </div>
+    <div class="mt-auto mb-6 px-2"><a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 whitespace-nowrap overflow-hidden"><i data-lucide="settings" class="w-4 h-4 shrink-0"></i><span class="text-[13px] font-medium">设置</span></a></div>
   </nav>
 
-  <!-- 二级导航 -->
+  <!-- ==================== 二级导航 ==================== -->
   <nav class="w-[130px] bg-white py-6 px-3 shrink-0 z-10 flex flex-col gap-1.5">
     <div class="px-2 mb-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">商品管理</div>
     <a href="#" class="block px-3 py-2 rounded-md text-[13px] bg-blue-50 text-blue-600 font-medium">商品库</a>
-    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">分类管理</a>
-    <a href="product-tags-demo.html" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">商品标签</a>
-    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">属性参数</a>
-    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">规格库</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100">分类管理</a>
+    <a href="product-tags-demo.html" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100">商品标签</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100">属性参数</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100">规格库</a>
   </nav>
 
-  <!-- 主内容区 -->
+  <!-- ==================== 主内容区 ==================== -->
   <main class="flex-1 overflow-hidden bg-slate-50 min-w-[950px] flex flex-col">
-
-    <!-- 面包屑 -->
     <header class="bg-white px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
       <div class="flex items-center gap-2">
-        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">首页</a>
+        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] font-medium">首页</a>
         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
-        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">商品管理</a>
+        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] font-medium">商品管理</a>
         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
         <span class="text-slate-900 text-[13px] font-semibold">商品库</span>
       </div>
     </header>
 
-    <!-- 滚动区 -->
     <div class="flex-1 overflow-y-auto p-5 flex flex-col">
-
-    <!-- 功能说明头部 -->
-    <div class="bg-white rounded-xl p-5 mb-5 shrink-0">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-          <i data-lucide="package" class="w-6 h-6" stroke-width="2.5"></i>
-        </div>
-        <div class="flex-1">
-          <div class="flex items-center gap-3 mb-1.5">
+      <!-- 功能说明头部 -->
+      <div class="bg-white rounded-xl p-5 mb-5 shrink-0">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0"><i data-lucide="package" class="w-6 h-6" stroke-width="2.5"></i></div>
+          <div class="flex-1">
             <h1 class="text-[20px] font-bold text-slate-900 leading-none">商品库</h1>
+            <p class="text-[13px] text-slate-500 mt-1">管理所有商品信息，支持上架、下架、编辑、删除、复制等操作。</p>
           </div>
-          <p class="text-[13px] text-slate-500 leading-relaxed">
-            管理所有商品信息，支持上架、下架、编辑、删除等操作。
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- 主数据卡片 -->
-    <div class="bg-white rounded-xl p-5 flex flex-col flex-1">
-
-      <!-- 操作区 -->
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-3">
-          <button onclick="openDrawer('drawerListing')" class="bg-blue-600 text-white px-5 py-2.5 rounded-md text-[13px] font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1.5 shadow-sm shadow-blue-600/20 active:translate-y-[1px]">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            上架商品
-          </button>
-          <!-- 批量操作按钮 -->
-          <div id="batchBtns" class="hidden flex items-center gap-2">
-            <button onclick="openBatchListingModal()" class="px-4 py-2.5 border border-green-200 text-green-600 text-[13px] font-medium rounded-md hover:bg-green-50 transition-colors flex items-center gap-1.5">
-              <i data-lucide="arrow-up-circle" class="w-4 h-4"></i>
-              批量上架 (<span id="selectedListingCount">0</span>)
-            </button>
-            <button onclick="openBatchDelistingModal()" class="px-4 py-2.5 border border-amber-200 text-amber-600 text-[13px] font-medium rounded-md hover:bg-amber-50 transition-colors flex items-center gap-1.5">
-              <i data-lucide="arrow-down-circle" class="w-4 h-4"></i>
-              批量下架 (<span id="selectedDelistingCount">0</span>)
-            </button>
-          </div>
-        </div>
-
-        <!-- 搜索筛选 -->
-        <div class="flex items-center gap-2.5">
-          <select id="filterStatus" onchange="applyFilters()" class="bg-slate-100 rounded-md py-2 px-3 text-[13px] outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700">
-            <option value="">全部状态</option>
-            <option value="active">已上架</option>
-            <option value="inactive">已下架</option>
-            <option value="draft">草稿</option>
-          </select>
-          <select id="filterCategory" onchange="applyFilters()" class="bg-slate-100 rounded-md py-2 px-3 text-[13px] outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700">
-            <option value="">全部分类</option>
-            <option value="electronics">电子产品</option>
-            <option value="clothing">服装配饰</option>
-            <option value="home">家居用品</option>
-            <option value="food">食品饮料</option>
-            <option value="beauty">美妆护肤</option>
-          </select>
-          <div class="relative">
-            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
-            <input id="searchInput" type="text" placeholder="搜索商品名称..." onkeydown="if(event.key==='Enter') applyFilters()" class="w-56 bg-slate-100 rounded-md py-2 pl-9 pr-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
-          </div>
-          <button onclick="applyFilters()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/20 text-[13px] font-semibold rounded-md transition-colors">搜索</button>
-          <button onclick="resetFilters()" class="px-4 py-2 border border-slate-200 text-slate-600 text-[13px] font-medium rounded-md hover:bg-slate-50 transition-colors">重置</button>
         </div>
       </div>
 
-      <!-- 数据表格 -->
-      <div class="overflow-x-auto flex-1 border border-slate-100 rounded-lg rounded-b-none border-b-0">
-        <table class="w-full text-left border-collapse min-w-[900px]">
-          <thead>
-            <tr class="bg-slate-50/80 text-slate-500 text-[13px]">
-              <th class="py-3 px-5 font-semibold border-b border-slate-100 w-10">
-                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-              </th>
+      <!-- 主数据卡片 -->
+      <div class="bg-white rounded-xl p-5 flex flex-col flex-1">
+        <!-- 操作区 -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <button onclick="openDrawer('drawerListing')" class="bg-blue-600 text-white px-5 py-2.5 rounded-md text-[13px] font-semibold hover:bg-blue-700 flex items-center gap-1.5 shadow-sm shadow-blue-600/20"><i data-lucide="plus" class="w-4 h-4"></i>上架商品</button>
+            <div id="batchBtns" class="hidden flex items-center gap-2">
+              <button onclick="openBatchModal('listing')" class="px-4 py-2.5 border border-green-200 text-green-600 text-[13px] font-medium rounded-md hover:bg-green-50 flex items-center gap-1.5"><i data-lucide="arrow-up-circle" class="w-4 h-4"></i>批量上架 (<span id="selectedCount">0</span>)</button>
+              <button onclick="openBatchModal('delisting')" class="px-4 py-2.5 border border-amber-200 text-amber-600 text-[13px] font-medium rounded-md hover:bg-amber-50 flex items-center gap-1.5"><i data-lucide="arrow-down-circle" class="w-4 h-4"></i>批量下架</button>
+              <button onclick="openBatchModal('delete')" class="px-4 py-2.5 border border-red-200 text-red-600 text-[13px] font-medium rounded-md hover:bg-red-50 flex items-center gap-1.5"><i data-lucide="trash-2" class="w-4 h-4"></i>批量删除</button>
+            </div>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <select id="filterStatus" onchange="applyFilters()" class="bg-slate-100 rounded-md py-2 px-3 text-[13px] outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700"><option value="">全部状态</option><option value="active">已上架</option><option value="inactive">已下架</option><option value="draft">草稿</option></select>
+            <select id="filterCategory" onchange="applyFilters()" class="bg-slate-100 rounded-md py-2 px-3 text-[13px] outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-700"><option value="">全部分类</option><option value="electronics">电子产品</option><option value="clothing">服装配饰</option><option value="home">家居用品</option><option value="food">食品饮料</option><option value="beauty">美妆护肤</option></select>
+            <div class="relative"><i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i><input id="searchInput" type="text" placeholder="搜索商品..." onkeydown="if(event.key==='Enter') applyFilters()" class="w-56 bg-slate-100 rounded-md py-2 pl-9 pr-3 text-[13px] focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400"></div>
+            <button onclick="applyFilters()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm shadow-blue-600/20 text-[13px] font-semibold rounded-md">搜索</button>
+            <button onclick="resetFilters()" class="px-4 py-2 border border-slate-200 text-slate-600 text-[13px] font-medium rounded-md hover:bg-slate-50">重置</button>
+          </div>
+        </div>
+
+        <!-- 数据表格 -->
+        <div class="overflow-x-auto flex-1 border border-slate-100 rounded-lg rounded-b-none border-b-0">
+          <table class="w-full text-left border-collapse min-w-[900px]">
+            <thead><tr class="bg-slate-50/80 text-slate-500 text-[13px]">
+              <th class="py-3 px-5 font-semibold border-b border-slate-100 w-10"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 text-blue-600 border-slate-300 rounded"></th>
               <th class="py-3 px-5 font-semibold border-b border-slate-100">商品信息</th>
               <th class="py-3 px-5 font-semibold border-b border-slate-100">分类</th>
               <th class="py-3 px-5 font-semibold border-b border-slate-100">价格</th>
@@ -469,57 +374,48 @@
               <th class="py-3 px-5 font-semibold border-b border-slate-100">状态</th>
               <th class="py-3 px-5 font-semibold border-b border-slate-100">销量</th>
               <th class="py-3 px-5 font-semibold border-b border-slate-100 text-right">操作</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody" class="text-[13px] bg-white">
-          </tbody>
-        </table>
-
-        <!-- 空状态 -->
-        <div id="emptyState" class="hidden flex-col items-center justify-center py-20 bg-white">
-          <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-4">
-            <i data-lucide="package" class="w-8 h-8"></i>
+            </tr></thead>
+            <tbody id="tableBody" class="text-[13px] bg-white"></tbody>
+          </table>
+          <div id="emptyState" class="hidden flex-col items-center justify-center py-20 bg-white">
+            <div class="w-16 h-16 bg-slate-50 text-slate-300 rounded-full flex items-center justify-center mb-4"><i data-lucide="package" class="w-8 h-8"></i></div>
+            <h3 class="text-slate-900 font-semibold mb-1">暂无商品</h3>
+            <p class="text-slate-500 text-[13px] mb-5">尚未上架任何商品</p>
+            <button onclick="openDrawer('drawerListing')" class="bg-blue-600 text-white px-5 py-2 rounded-md text-[13px] font-medium hover:bg-blue-700">上架商品</button>
           </div>
-          <h3 class="text-slate-900 font-semibold mb-1">暂无商品</h3>
-          <p class="text-slate-500 text-[13px] mb-5">尚未上架任何商品，点击上方按钮开始上架</p>
-          <button onclick="openDrawer('drawerListing')" class="bg-blue-600 text-white px-5 py-2 rounded-md text-[13px] font-medium hover:bg-blue-700 transition-colors">上架商品</button>
+        </div>
+
+        <!-- 分页 -->
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-[13px] text-slate-500 bg-white">
+          <div class="flex items-center gap-4 pl-2">
+            <span id="totalCount">共 0 条</span>
+            <span class="text-slate-400">上架: <span id="activeCount" class="text-green-600 font-medium">0</span></span>
+            <span class="text-slate-400">下架: <span id="inactiveCount" class="text-amber-600 font-medium">0</span></span>
+            <span class="text-slate-400">库存预警: <span id="warningCount" class="text-red-600 font-medium">0</span></span>
+          </div>
+          <div class="flex items-center pr-2 gap-1">
+            <button id="prevBtn" onclick="goToPage(currentPage - 1)" class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-slate-50 disabled:opacity-50" disabled><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+            <div id="pageNumbers" class="flex items-center gap-1"></div>
+            <button id="nextBtn" onclick="goToPage(currentPage + 1)" class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50" disabled><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+          </div>
         </div>
       </div>
-
-      <!-- 分页 -->
-      <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-[13px] text-slate-500 bg-white">
-        <div class="flex items-center gap-4 pl-2">
-          <span id="totalCount">共 0 条记录</span>
-          <span class="text-slate-400">已上架: <span id="activeCount" class="text-slate-600 font-medium">0</span></span>
-          <span class="text-slate-400">已下架: <span id="inactiveCount" class="text-slate-600 font-medium">0</span></span>
-        </div>
-        <div class="flex items-center pr-2 gap-1">
-          <button id="prevBtn" onclick="goToPage(currentPage - 1)" class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-400 hover:bg-slate-50 disabled:opacity-50 transition-colors" disabled>
-            <i data-lucide="chevron-left" class="w-4 h-4"></i>
-          </button>
-          <div id="pageNumbers" class="flex items-center gap-1"></div>
-          <button id="nextBtn" onclick="goToPage(currentPage + 1)" class="w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-50 transition-colors" disabled>
-            <i data-lucide="chevron-right" class="w-4 h-4"></i>
-          </button>
-        </div>
-      </div>
-
     </div>
   </main>
 
   <script>
     lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
 
-    // ==================== 数据 ====================
+    // 数据
     let PRODUCTS = [
-      { id: 1, name: 'Apple iPhone 15 Pro Max 256GB', category: 'electronics', price: 9999, originalPrice: 10999, stock: 156, status: 'active', sales: 234, image: '📱', desc: '最新款苹果旗舰手机' },
-      { id: 2, name: 'Nike Air Jordan 1 High OG', category: 'clothing', price: 1299, originalPrice: 1599, stock: 89, status: 'active', sales: 567, image: '👟', desc: '经典复刻款运动鞋' },
-      { id: 3, name: '戴森 V15 无线吸尘器', category: 'home', price: 5990, originalPrice: 6490, stock: 45, status: 'active', sales: 123, image: '🧹', desc: '高端家用清洁设备' },
-      { id: 4, name: 'SK-II 神仙水 230ml', category: 'beauty', price: 1590, originalPrice: 1790, stock: 234, status: 'active', sales: 892, image: '🧴', desc: '护肤精华液' },
-      { id: 5, name: '三只松鼠坚果礼盒', category: 'food', price: 168, originalPrice: 199, stock: 0, status: 'inactive', sales: 1256, image: '🥜', desc: '休闲零食大礼包' },
-      { id: 6, name: '索尼 WH-1000XM5 降噪耳机', category: 'electronics', price: 2999, originalPrice: 3299, stock: 78, status: 'active', sales: 145, image: '🎧', desc: '旗舰降噪耳机' },
-      { id: 7, name: '小米智能电视 75英寸', category: 'electronics', price: 4999, originalPrice: 5999, stock: 23, status: 'draft', sales: 0, image: '📺', desc: '大屏智能电视' },
-      { id: 8, name: 'Lululemon瑜伽裤', category: 'clothing', price: 850, originalPrice: 980, stock: 0, status: 'inactive', sales: 345, image: '🩳', desc: '高品质运动服饰' },
+      { id: 1, name: 'iPhone 15 Pro Max 256GB', category: 'electronics', price: 9999, originalPrice: 10999, stock: 156, status: 'active', sales: 234, image: '📱', desc: '最新款苹果旗舰手机', images: ['📱'], priceHistory: [{date: '2026-03-15', old: 10999, new: 9999, reason: '促销降价'}, {date: '2026-02-01', old: 11999, new: 10999, reason: '正常调整'}] },
+      { id: 2, name: 'Nike Air Jordan 1 High OG', category: 'clothing', price: 1299, originalPrice: 1599, stock: 8, status: 'active', sales: 567, image: '👟', desc: '经典复刻款运动鞋', images: ['👟','👟'], priceHistory: [{date: '2026-04-01', old: 1599, new: 1299, reason: '季末促销'}] },
+      { id: 3, name: '戴森 V15 无线吸尘器', category: 'home', price: 5990, originalPrice: 6490, stock: 45, status: 'active', sales: 123, image: '🧹', desc: '高端家用清洁设备', images: ['🧹'], priceHistory: [] },
+      { id: 4, name: 'SK-II 神仙水 230ml', category: 'beauty', price: 1590, originalPrice: 1790, stock: 234, status: 'active', sales: 892, image: '🧴', desc: '护肤精华液', images: ['🧴','🧴','🧴'], priceHistory: [{date: '2026-03-01', old: 1790, new: 1590, reason: '会员专享价'}] },
+      { id: 5, name: '三只松鼠坚果礼盒', category: 'food', price: 168, originalPrice: 199, stock: 0, status: 'inactive', sales: 1256, image: '🥜', desc: '休闲零食大礼包', images: ['🥜'], priceHistory: [] },
+      { id: 6, name: '索尼 WH-1000XM5 降噪耳机', category: 'electronics', price: 2999, originalPrice: 3299, stock: 78, status: 'active', sales: 145, image: '🎧', desc: '旗舰降噪耳机', images: ['🎧','🎧'], priceHistory: [] },
+      { id: 7, name: '小米智能电视 75英寸', category: 'electronics', price: 4999, originalPrice: 5999, stock: 23, status: 'draft', sales: 0, image: '📺', desc: '大屏智能电视', images: ['📺'], priceHistory: [] },
+      { id: 8, name: 'Lululemon瑜伽裤', category: 'clothing', price: 850, originalPrice: 980, stock: 5, status: 'inactive', sales: 345, image: '🩳', desc: '高品质运动服饰', images: ['🩳'], priceHistory: [] },
     ];
 
     let filteredData = [...PRODUCTS];
@@ -527,454 +423,366 @@
     let currentPage = 1;
     let pageSize = 10;
     let editTargetId = null;
-    let deleteTargetId = null;
+    let detailTargetId = null;
+    let batchActionType = null;
+    let uploadedImages = [null, null, null, null];
 
-    const CATEGORY_MAP = {
-      'electronics': '电子产品',
-      'clothing': '服装配饰',
-      'home': '家居用品',
-      'food': '食品饮料',
-      'beauty': '美妆护肤'
-    };
+    const CATEGORY_MAP = { 'electronics': '电子产品', 'clothing': '服装配饰', 'home': '家居用品', 'food': '食品饮料', 'beauty': '美妆护肤' };
+    const STATUS_MAP = { 'active': { text: '已上架', class: 'bg-green-50 text-green-600' }, 'inactive': { text: '已下架', class: 'bg-amber-50 text-amber-600' }, 'draft': { text: '草稿', class: 'bg-slate-100 text-slate-500' } };
 
-    const STATUS_MAP = {
-      'active': { text: '已上架', class: 'bg-green-50 text-green-600' },
-      'inactive': { text: '已下架', class: 'bg-amber-50 text-amber-600' },
-      'draft': { text: '草稿', class: 'bg-slate-100 text-slate-500' }
-    };
-
-    // ==================== Toast ====================
+    // Toast
     let toastTimeout;
     function showToast(message, type = 'info') {
       const toast = document.getElementById('toast');
       const msg = document.getElementById('toast-msg');
       const icon = toast.querySelector('i');
-
       msg.textContent = message;
-      if (type === 'error') {
-        icon.setAttribute('data-lucide', 'x-circle');
-        icon.className = 'w-4 h-4 text-red-400';
-      } else if (type === 'success') {
-        icon.setAttribute('data-lucide', 'check-circle');
-        icon.className = 'w-4 h-4 text-green-400';
-      } else {
-        icon.setAttribute('data-lucide', 'info');
-        icon.className = 'w-4 h-4 text-blue-400';
-      }
+      icon.setAttribute('data-lucide', type === 'error' ? 'x-circle' : type === 'success' ? 'check-circle' : 'info');
+      icon.className = `w-4 h-4 text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-400`;
       lucide.createIcons();
-
       toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-10px]');
       toast.classList.add('opacity-100', 'translate-y-0');
-
       clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.remove('opacity-100', 'translate-y-0');
-        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-10px]');
-      }, 3000);
+      toastTimeout = setTimeout(() => { toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-10px]'); toast.classList.remove('opacity-100', 'translate-y-0'); }, 3000);
     }
 
-    // ==================== 弹窗控制 ====================
-    function openDrawer(id) {
-      document.getElementById('overlay').classList.remove('hidden');
-      document.getElementById(id).classList.remove('hidden');
-      lucide.createIcons();
-    }
+    // 库存预警
+    function checkStockWarning() {
+      const lowStock = PRODUCTS.filter(p => p.status === 'active' && p.stock > 0 && p.stock < 10);
+      const noStock = PRODUCTS.filter(p => p.status === 'active' && p.stock === 0);
+      const warning = document.getElementById('stockWarning');
+      const msg = document.getElementById('stockWarningMsg');
 
-    function closeDrawer(id) {
-      document.getElementById('overlay').classList.add('hidden');
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    function openModal(id) {
-      document.getElementById('overlay').classList.remove('hidden');
-      document.getElementById(id).classList.remove('hidden');
-      lucide.createIcons();
-    }
-
-    function closeModal(id) {
-      document.getElementById('overlay').classList.add('hidden');
-      document.getElementById(id).classList.add('hidden');
-    }
-
-    function closeAllModals() {
-      document.getElementById('overlay').classList.add('hidden');
-      ['drawerListing', 'drawerEdit', 'modalBatchListing', 'modalBatchDelisting', 'modalDelete'].forEach(id => {
-        document.getElementById(id).classList.add('hidden');
-      });
-    }
-
-    // ==================== 上架商品 ====================
-    function addSpecRow() {
-      const container = document.getElementById('specContainer');
-      const div = document.createElement('div');
-      div.className = 'flex gap-2 items-center';
-      div.innerHTML = `
-        <input type="text" placeholder="规格名称" class="w-32 bg-slate-100 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
-        <input type="text" placeholder="规格值" class="flex-1 bg-slate-100 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:bg-white border border-transparent focus:border-blue-500 text-slate-900 placeholder:text-slate-400">
-        <button onclick="this.parentElement.remove(); lucide.createIcons()" class="w-8 h-8 rounded-md bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors">
-          <i data-lucide="x" class="w-4 h-4"></i>
-        </button>
-      `;
-      container.appendChild(div);
-      lucide.createIcons();
-    }
-
-    function toggleTag(btn) {
-      if (btn.classList.contains('bg-blue-50')) {
-        btn.classList.remove('bg-blue-50', 'text-blue-600');
-        btn.classList.add('bg-slate-100', 'text-slate-600');
-      } else {
-        btn.classList.remove('bg-slate-100', 'text-slate-600');
-        btn.classList.add('bg-blue-50', 'text-blue-600');
+      if (noStock.length > 0 || lowStock.length > 0) {
+        let text = '';
+        if (noStock.length > 0) text += `${noStock.length}个商品已缺货`;
+        if (lowStock.length > 0) text += `${lowStock.length}个商品库存不足`;
+        msg.textContent = text;
+        warning.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        warning.classList.add('opacity-100');
+        lucide.createIcons();
       }
     }
 
+    function closeStockWarning() {
+      document.getElementById('stockWarning').classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // 弹窗控制
+    function openDrawer(id) { document.getElementById('overlay').classList.remove('hidden'); document.getElementById(id).classList.remove('hidden'); lucide.createIcons(); }
+    function closeDrawer(id) { document.getElementById('overlay').classList.add('hidden'); document.getElementById(id).classList.add('hidden'); }
+    function openModal(id) { document.getElementById('overlay').classList.remove('hidden'); document.getElementById(id).classList.remove('hidden'); lucide.createIcons(); }
+    function closeModal(id) { document.getElementById('overlay').classList.add('hidden'); document.getElementById(id).classList.add('hidden'); }
+    function closeAllModals() { document.getElementById('overlay').classList.add('hidden'); ['drawerListing', 'drawerEdit', 'modalDetail', 'modalPriceHistory', 'modalBatchAction'].forEach(id => document.getElementById(id)?.classList.add('hidden')); }
+
+    // 图片上传模拟
+    const SAMPLE_IMAGES = ['📱', '📷', '💻', '🎧', '⌚', '🎮', '📺', '👟', '🧴', '🥜'];
+    function simulateUpload(index) {
+      if (uploadedImages[index]) return;
+      uploadedImages[index] = SAMPLE_IMAGES[Math.floor(Math.random() * SAMPLE_IMAGES.length)];
+      const preview = document.getElementById(`preview${index}`);
+      preview.classList.remove('hidden');
+      preview.querySelector('img').src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='50' x='50' text-anchor='middle' font-size='50' fill='%2364748b'>${uploadedImages[index]}</text></svg>`;
+      preview.parentElement.querySelector('.upload-icon').classList.add('hidden');
+      showToast('图片上传成功', 'success');
+      lucide.createIcons();
+    }
+
+    function removeImage(index) {
+      uploadedImages[index] = null;
+      const preview = document.getElementById(`preview${index}`);
+      preview.classList.add('hidden');
+      preview.parentElement.querySelector('.upload-icon').classList.remove('hidden');
+      showToast('图片已删除', 'success');
+      lucide.createIcons();
+    }
+
+    // 上架商品
     function submitListing() {
       const name = document.getElementById('listingName').value.trim();
       const category = document.getElementById('listingCategory').value;
       const price = parseFloat(document.getElementById('listingPrice').value) || 0;
       const stock = parseInt(document.getElementById('listingStock').value) || 0;
       const status = document.querySelector('input[name="listingStatus"]:checked').value;
-
-      if (!name || !category || price <= 0) {
-        showToast('请填写必要信息', 'error');
-        return;
-      }
-
+      if (!name || !category || price <= 0) { showToast('请填写必要信息', 'error'); return; }
+      const images = uploadedImages.filter(i => i);
       const newId = Math.max(...PRODUCTS.map(p => p.id)) + 1;
-      PRODUCTS.unshift({
-        id: newId,
-        name,
-        category,
-        price,
-        originalPrice: parseFloat(document.getElementById('listingOriginalPrice').value) || price,
-        stock,
-        status,
-        sales: 0,
-        image: '📦',
-        desc: document.getElementById('listingDesc').value
-      });
-
+      PRODUCTS.unshift({ id: newId, name, category, price, originalPrice: price, stock, status, sales: 0, image: images[0] || '📦', desc: document.getElementById('listingDesc').value, images, priceHistory: [] });
+      uploadedImages = [null, null, null, null];
       applyFilters();
       closeDrawer('drawerListing');
       clearListingForm();
+      checkStockWarning();
       showToast('商品上架成功', 'success');
     }
 
     function clearListingForm() {
-      document.getElementById('listingName').value = '';
+      ['listingName', 'listingPrice', 'listingStock', 'listingDesc'].forEach(id => document.getElementById(id).value = '');
       document.getElementById('listingCategory').value = '';
-      document.getElementById('listingPrice').value = '';
-      document.getElementById('listingStock').value = '';
-      document.getElementById('listingOriginalPrice').value = '';
-      document.getElementById('listingDesc').value = '';
       document.querySelector('input[name="listingStatus"][value="active"]').checked = true;
+      for (let i = 0; i < 4; i++) { uploadedImages[i] = null; document.getElementById(`preview${i}`).classList.add('hidden'); document.getElementById(`preview${i}`).parentElement.querySelector('.upload-icon').classList.remove('hidden'); }
+      lucide.createIcons();
     }
 
-    // ==================== 编辑商品 ====================
+    // 编辑商品
     function openEditDrawer(id) {
       editTargetId = id;
-      const product = PRODUCTS.find(p => p.id === id);
-      if (!product) return;
-
-      document.getElementById('editHint').textContent = `编辑: ${product.name}`;
-      document.getElementById('editName').value = product.name;
-      document.getElementById('editCategory').value = product.category;
-      document.getElementById('editPrice').value = product.price;
-      document.getElementById('editStock').value = product.stock;
-      document.getElementById('editDesc').value = product.desc || '';
-
+      const p = PRODUCTS.find(p => p.id === id);
+      if (!p) return;
+      document.getElementById('editHint').textContent = `编辑: ${p.name}`;
+      document.getElementById('editName').value = p.name;
+      document.getElementById('editCategory').value = p.category;
+      document.getElementById('editPrice').value = p.price;
+      document.getElementById('editStock').value = p.stock;
+      document.getElementById('editDesc').value = p.desc || '';
       openDrawer('drawerEdit');
     }
 
     function submitEdit() {
-      const product = PRODUCTS.find(p => p.id === editTargetId);
-      if (!product) return;
-
-      product.name = document.getElementById('editName').value.trim();
-      product.category = document.getElementById('editCategory').value;
-      product.price = parseFloat(document.getElementById('editPrice').value) || 0;
-      product.stock = parseInt(document.getElementById('editStock').value) || 0;
-      product.desc = document.getElementById('editDesc').value;
-
+      const p = PRODUCTS.find(p => p.id === editTargetId);
+      if (!p) return;
+      const oldPrice = p.price;
+      const newPrice = parseFloat(document.getElementById('editPrice').value) || 0;
+      if (oldPrice !== newPrice) {
+        p.priceHistory.unshift({ date: new Date().toLocaleDateString('zh-CN'), old: oldPrice, new: newPrice, reason: '手动调整' });
+      }
+      p.name = document.getElementById('editName').value.trim();
+      p.category = document.getElementById('editCategory').value;
+      p.price = newPrice;
+      p.stock = parseInt(document.getElementById('editStock').value) || 0;
+      p.desc = document.getElementById('editDesc').value;
       applyFilters();
       closeDrawer('drawerEdit');
-      showToast('商品信息已更新', 'success');
+      checkStockWarning();
+      showToast('商品已更新', 'success');
     }
 
-    // ==================== 单个上架/下架 ====================
-    function toggleStatus(id) {
-      const product = PRODUCTS.find(p => p.id === id);
-      if (!product) return;
+    // 商品详情
+    function openDetailModal(id) {
+      detailTargetId = id;
+      const p = PRODUCTS.find(p => p.id === id);
+      if (!p) return;
+      document.getElementById('detailName').textContent = p.name;
+      document.getElementById('detailDesc').textContent = p.desc || '暂无描述';
+      document.getElementById('detailPrice').textContent = `¥${p.price}`;
+      document.getElementById('detailOriginalPrice').textContent = p.originalPrice > p.price ? `原价 ¥${p.originalPrice}` : '';
+      document.getElementById('detailDiscount').textContent = p.originalPrice > p.price ? `-${Math.round((1 - p.price / p.originalPrice) * 100)}%` : '';
+      document.getElementById('detailStock').textContent = p.stock;
+      document.getElementById('detailSales').textContent = p.sales;
+      document.getElementById('detailStatus').textContent = STATUS_MAP[p.status].text;
+      document.getElementById('detailCategory').textContent = CATEGORY_MAP[p.category];
+      document.getElementById('detailMainImage').textContent = p.image;
 
-      if (product.status === 'active') {
-        product.status = 'inactive';
-        showToast('商品已下架', 'success');
-      } else if (product.status === 'inactive') {
-        product.status = 'active';
-        showToast('商品已上架', 'success');
-      }
+      // 缩略图
+      const thumbs = document.getElementById('detailThumbnails');
+      thumbs.innerHTML = p.images.map((img, i) => `<div class="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200 ${i === 0 ? 'ring-2 ring-blue-500' : ''}">${img}</div>`).join('');
 
-      applyFilters();
-    }
-
-    // ==================== 批量操作 ====================
-    function toggleSelectAll() {
-      const selectAll = document.getElementById('selectAll');
-      const checkboxes = document.querySelectorAll('.row-checkbox');
-
-      if (selectAll.checked) {
-        selectedIds = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
-        checkboxes.forEach(cb => cb.checked = true);
+      // 价格历史
+      const history = document.getElementById('priceHistoryList');
+      if (p.priceHistory.length === 0) {
+        history.innerHTML = '<div class="text-sm text-slate-400">暂无价格调整记录</div>';
       } else {
-        selectedIds = [];
-        checkboxes.forEach(cb => cb.checked = false);
+        history.innerHTML = p.priceHistory.map(h => `
+          <div class="flex items-center justify-between py-2 border-b border-slate-100 last:border-b-0">
+            <div class="text-xs text-slate-500">${h.date}</div>
+            <div class="flex items-center gap-2">
+              <span class="text-sm text-slate-400">¥${h.old}</span>
+              <i data-lucide="arrow-right" class="w-3 h-3 text-slate-300"></i>
+              <span class="text-sm font-medium ${h.new < h.old ? 'text-green-600' : 'text-red-600'}">¥${h.new}</span>
+              <span class="text-xs text-slate-400">${h.reason}</span>
+            </div>
+          </div>
+        `).join('');
       }
+      openModal('modalDetail');
+    }
 
+    // 复制商品
+    function copyProduct() {
+      const p = PRODUCTS.find(p => p.id === detailTargetId);
+      if (!p) return;
+      const newId = Math.max(...PRODUCTS.map(p => p.id)) + 1;
+      PRODUCTS.unshift({ ...p, id: newId, name: p.name + ' (复制)', sales: 0, status: 'draft', priceHistory: [] });
+      applyFilters();
+      closeModal('modalDetail');
+      showToast('商品已复制为草稿', 'success');
+    }
+
+    // 价格历史弹窗
+    function openPriceHistoryModal(id) {
+      const p = PRODUCTS.find(p => p.id === id);
+      if (!p) return;
+      document.getElementById('priceHistoryHint').textContent = p.name;
+      const content = document.getElementById('priceHistoryContent');
+      if (p.priceHistory.length === 0) {
+        content.innerHTML = '<div class="text-sm text-slate-400 text-center py-8">暂无价格调整记录</div>';
+      } else {
+        content.innerHTML = p.priceHistory.map(h => `
+          <div class="flex items-center gap-4 p-3 bg-slate-50 rounded-lg">
+            <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center shrink-0"><i data-lucide="tag" class="w-4 h-4"></i></div>
+            <div class="flex-1">
+              <div class="text-sm font-medium text-slate-900">¥${h.old} → ¥${h.new}</div>
+              <div class="text-xs text-slate-500">${h.date} · ${h.reason}</div>
+            </div>
+            <div class="text-sm font-medium ${h.new < h.old ? 'text-green-600' : 'text-red-600'}">${h.new < h.old ? '-' : '+'}${Math.abs(h.new - h.old)}</div>
+          </div>
+        `).join('');
+      }
+      openModal('modalPriceHistory');
+    }
+
+    // 单个上架/下架
+    function toggleStatus(id) {
+      const p = PRODUCTS.find(p => p.id === id);
+      if (!p) return;
+      if (p.status === 'active') { p.status = 'inactive'; showToast('商品已下架', 'success'); }
+      else if (p.status === 'inactive' || p.status === 'draft') { p.status = 'active'; showToast('商品已上架', 'success'); }
+      applyFilters();
+      checkStockWarning();
+    }
+
+    // 批量操作
+    function toggleSelectAll() {
+      const sel = document.getElementById('selectAll');
+      const cbs = document.querySelectorAll('.row-checkbox');
+      selectedIds = sel.checked ? Array.from(cbs).map(cb => parseInt(cb.dataset.id)) : [];
+      cbs.forEach(cb => cb.checked = sel.checked);
       updateBatchBtns();
     }
 
     function toggleRowSelect(id) {
       const idx = selectedIds.indexOf(id);
-      if (idx > -1) {
-        selectedIds.splice(idx, 1);
-      } else {
-        selectedIds.push(id);
-      }
+      if (idx > -1) selectedIds.splice(idx, 1); else selectedIds.push(id);
       updateBatchBtns();
-
-      const checkboxes = document.querySelectorAll('.row-checkbox');
-      const allChecked = checkboxes.length > 0 && Array.from(checkboxes).every(cb => cb.checked);
-      document.getElementById('selectAll').checked = allChecked;
+      document.getElementById('selectAll').checked = document.querySelectorAll('.row-checkbox').length > 0 && Array.from(document.querySelectorAll('.row-checkbox')).every(cb => cb.checked);
     }
 
     function updateBatchBtns() {
-      const batchBtns = document.getElementById('batchBtns');
+      const btns = document.getElementById('batchBtns');
+      document.getElementById('selectedCount').textContent = selectedIds.length;
+      if (selectedIds.length > 0) { btns.classList.remove('hidden'); btns.classList.add('flex'); }
+      else { btns.classList.add('hidden'); btns.classList.remove('flex'); }
+    }
+
+    function openBatchModal(type) {
+      batchActionType = type;
+      const titles = { listing: '批量上架', delisting: '批量下架', delete: '批量删除' };
+      const colors = { listing: 'green', delisting: 'amber', delete: 'red' };
+      const icons = { listing: 'arrow-up-circle', delisting: 'arrow-down-circle', delete: 'trash-2' };
+      const hints = { listing: '上架后商品将立即对外销售', delisting: '下架后商品将暂停销售', delete: '删除后无法恢复' };
+
       const count = selectedIds.length;
+      document.getElementById('batchActionTitle').textContent = titles[type];
+      document.getElementById('batchActionMsg').textContent = `确定要对 ${count} 个商品执行${titles[type]}操作？`;
+      document.getElementById('batchActionHint').textContent = hints[type];
+      document.getElementById('batchActionIcon').className = `w-10 h-10 rounded-full bg-${colors[type]}-50 text-${colors[type]}-500 flex items-center justify-center shrink-0`;
+      document.getElementById('batchActionIcon').innerHTML = `<i data-lucide="${icons[type]}" class="w-5 h-5"></i>`;
+      document.getElementById('batchActionBtn').className = `px-5 py-2 bg-${colors[type]}-600 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-${colors[type]}-700`;
 
-      document.getElementById('selectedListingCount').textContent = count;
-      document.getElementById('selectedDelistingCount').textContent = count;
-
-      if (count > 0) {
-        batchBtns.classList.remove('hidden');
-        batchBtns.classList.add('flex');
-      } else {
-        batchBtns.classList.add('hidden');
-        batchBtns.classList.remove('flex');
-      }
+      openModal('modalBatchAction');
     }
 
-    function openBatchListingModal() {
-      const canListing = selectedIds.filter(id => {
-        const p = PRODUCTS.find(p => p.id === id);
-        return p && p.status !== 'active';
-      });
-
-      if (canListing.length === 0) {
-        showToast('选中的商品均已上架', 'error');
-        return;
-      }
-
-      document.getElementById('batchListingCount').textContent = canListing.length;
-      openModal('modalBatchListing');
-    }
-
-    function confirmBatchListing() {
+    function confirmBatchAction() {
       selectedIds.forEach(id => {
         const p = PRODUCTS.find(p => p.id === id);
-        if (p && p.status !== 'active') {
-          p.status = 'active';
-        }
+        if (!p) return;
+        if (batchActionType === 'listing' && p.status !== 'active') p.status = 'active';
+        else if (batchActionType === 'delisting' && p.status === 'active') p.status = 'inactive';
+        else if (batchActionType === 'delete') PRODUCTS = PRODUCTS.filter(p => p.id !== id);
       });
-
       selectedIds = [];
       applyFilters();
-      closeModal('modalBatchListing');
+      closeModal('modalBatchAction');
       updateBatchBtns();
-      showToast('批量上架成功', 'success');
+      checkStockWarning();
+      showToast(`${batchActionType === 'delete' ? '批量删除' : batchActionType === 'listing' ? '批量上架' : '批量下架'}成功`, 'success');
     }
 
-    function openBatchDelistingModal() {
-      const canDelisting = selectedIds.filter(id => {
-        const p = PRODUCTS.find(p => p.id === id);
-        return p && p.status === 'active';
-      });
-
-      if (canDelisting.length === 0) {
-        showToast('选中的商品均已下架或为草稿', 'error');
-        return;
-      }
-
-      document.getElementById('batchDelistingCount').textContent = canDelisting.length;
-      openModal('modalBatchDelisting');
-    }
-
-    function confirmBatchDelisting() {
-      selectedIds.forEach(id => {
-        const p = PRODUCTS.find(p => p.id === id);
-        if (p && p.status === 'active') {
-          p.status = 'inactive';
-        }
-      });
-
-      selectedIds = [];
-      applyFilters();
-      closeModal('modalBatchDelisting');
-      updateBatchBtns();
-      showToast('批量下架成功', 'success');
-    }
-
-    // ==================== 删除 ====================
-    function openDeleteModal(id) {
-      const product = PRODUCTS.find(p => p.id === id);
-      if (!product) return;
-
-      deleteTargetId = id;
-      document.getElementById('deleteMsg').textContent = `确定要删除商品 "${product.name}" 吗？`;
-      openModal('modalDelete');
-    }
-
-    function confirmDelete() {
-      PRODUCTS = PRODUCTS.filter(p => p.id !== deleteTargetId);
-      applyFilters();
-      closeModal('modalDelete');
-      showToast('商品已删除', 'success');
-      deleteTargetId = null;
-    }
-
-    // ==================== 搜索筛选 ====================
+    // 搜索筛选
     function applyFilters() {
       const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
       const status = document.getElementById('filterStatus').value;
       const category = document.getElementById('filterCategory').value;
-
       filteredData = PRODUCTS.filter(p => {
         if (keyword && !p.name.toLowerCase().includes(keyword)) return false;
         if (status && p.status !== status) return false;
         if (category && p.category !== category) return false;
         return true;
       });
-
       currentPage = 1;
       renderTable();
     }
 
-    function resetFilters() {
-      document.getElementById('searchInput').value = '';
-      document.getElementById('filterStatus').value = '';
-      document.getElementById('filterCategory').value = '';
-      applyFilters();
-    }
+    function resetFilters() { document.getElementById('searchInput').value = ''; document.getElementById('filterStatus').value = ''; document.getElementById('filterCategory').value = ''; applyFilters(); }
 
-    // ==================== 分页 ====================
-    function goToPage(page) {
-      const totalPages = Math.ceil(filteredData.length / pageSize);
-      if (page < 1 || page > totalPages) return;
-      currentPage = page;
-      renderTable();
-    }
+    // 分页
+    function goToPage(page) { const totalPages = Math.ceil(filteredData.length / pageSize); if (page < 1 || page > totalPages) return; currentPage = page; renderTable(); }
 
-    // ==================== 表格渲染 ====================
+    // 表格渲染
     function renderTable() {
       const tbody = document.getElementById('tableBody');
-      const emptyState = document.getElementById('emptyState');
-      const countText = document.getElementById('totalCount');
-      const activeText = document.getElementById('activeCount');
-      const inactiveText = document.getElementById('inactiveCount');
-
+      const empty = document.getElementById('emptyState');
       const start = (currentPage - 1) * pageSize;
       const pageData = filteredData.slice(start, start + pageSize);
       const totalPages = Math.ceil(filteredData.length / pageSize);
-
       const activeTotal = PRODUCTS.filter(p => p.status === 'active').length;
       const inactiveTotal = PRODUCTS.filter(p => p.status === 'inactive').length;
+      const warningTotal = PRODUCTS.filter(p => p.status === 'active' && p.stock < 10).length;
 
       tbody.innerHTML = '';
-      countText.textContent = `共 ${filteredData.length} 条记录`;
-      activeText.textContent = activeTotal;
-      inactiveText.textContent = inactiveTotal;
+      document.getElementById('totalCount').textContent = `共 ${filteredData.length} 条`;
+      document.getElementById('activeCount').textContent = activeTotal;
+      document.getElementById('inactiveCount').textContent = inactiveTotal;
+      document.getElementById('warningCount').textContent = warningTotal;
 
       document.getElementById('prevBtn').disabled = currentPage === 1;
       document.getElementById('nextBtn').disabled = currentPage >= totalPages;
 
-      // 页码
-      const pageNumbers = document.getElementById('pageNumbers');
-      pageNumbers.innerHTML = '';
+      const pages = document.getElementById('pageNumbers');
+      pages.innerHTML = '';
       for (let i = 1; i <= Math.min(totalPages, 5); i++) {
         const btn = document.createElement('button');
-        btn.className = i === currentPage
-          ? 'w-8 h-8 flex items-center justify-center rounded bg-blue-600 text-white font-semibold'
-          : 'w-8 h-8 flex items-center justify-center rounded border border-slate-200 text-slate-600 hover:bg-slate-50';
+        btn.className = `w-8 h-8 flex items-center justify-center rounded ${i === currentPage ? 'bg-blue-600 text-white font-semibold' : 'border border-slate-200 text-slate-600 hover:bg-slate-50'}`;
         btn.textContent = i;
         btn.onclick = () => goToPage(i);
-        pageNumbers.appendChild(btn);
+        pages.appendChild(btn);
       }
 
-      if (filteredData.length === 0) {
-        tbody.classList.add('hidden');
-        emptyState.classList.remove('hidden');
-        emptyState.classList.add('flex');
-      } else {
-        tbody.classList.remove('hidden');
-        emptyState.classList.add('hidden');
-        emptyState.classList.remove('flex');
-
-        pageData.forEach(product => {
-          const statusInfo = STATUS_MAP[product.status];
-          const discount = product.originalPrice > product.price
-            ? `<span class="text-xs text-red-500 ml-1">-${Math.round((1 - product.price / product.originalPrice) * 100)}%</span>`
-            : '';
-
+      if (filteredData.length === 0) { tbody.classList.add('hidden'); empty.classList.remove('hidden'); empty.classList.add('flex'); }
+      else {
+        tbody.classList.remove('hidden'); empty.classList.add('hidden'); empty.classList.remove('flex');
+        pageData.forEach(p => {
+          const statusInfo = STATUS_MAP[p.status];
+          const discount = p.originalPrice > p.price ? `<span class="text-xs text-red-500 ml-1">-${Math.round((1 - p.price / p.originalPrice) * 100)}%</span>` : '';
+          const stockWarning = p.stock < 10 && p.stock > 0 ? '<span class="text-xs text-amber-500 ml-1">库存不足</span>' : p.stock === 0 ? '<span class="text-xs text-red-500 ml-1">缺货</span>' : '';
           const tr = document.createElement('tr');
           tr.className = 'border-b border-slate-100 hover:bg-slate-50/70 transition-colors group';
           tr.innerHTML = `
-            <td class="py-4 px-5">
-              <input type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" data-id="${product.id}" ${selectedIds.includes(product.id) ? 'checked' : ''} onchange="toggleRowSelect(${product.id})">
-            </td>
-            <td class="py-4 px-5">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg">${product.image}</div>
-                <div class="min-w-0">
-                  <div class="font-medium text-slate-900 truncate max-w-[280px]">${product.name}</div>
-                  <div class="text-xs text-slate-400 mt-0.5 truncate">${product.desc || '暂无描述'}</div>
-                </div>
-              </div>
-            </td>
-            <td class="py-4 px-5 text-slate-600">${CATEGORY_MAP[product.category]}</td>
-            <td class="py-4 px-5">
-              <div class="flex items-center">
-                <span class="font-medium text-slate-900">¥${product.price}</span>
-                ${discount}
-              </div>
-              ${product.originalPrice > product.price ? `<div class="text-xs text-slate-400">原价 ¥${product.originalPrice}</div>` : ''}
-            </td>
-            <td class="py-4 px-5">
-              <span class="${product.stock === 0 ? 'text-red-500' : 'text-slate-600'}">${product.stock}</span>
-              ${product.stock === 0 ? '<span class="text-xs text-red-400 ml-1">缺货</span>' : ''}
-            </td>
-            <td class="py-4 px-5">
-              <span class="px-2 py-1 rounded text-xs font-medium ${statusInfo.class}">${statusInfo.text}</span>
-            </td>
-            <td class="py-4 px-5 text-slate-600">${product.sales}</td>
-            <td class="py-4 px-5 text-right">
-              <div class="flex items-center justify-end gap-2">
-                <button onclick="toggleStatus(${product.id})" class="text-xs px-2 py-1 rounded transition-colors ${product.status === 'active' ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50'}">
-                  ${product.status === 'active' ? '下架' : product.status === 'inactive' ? '上架' : '上架'}
-                </button>
-                <div class="w-px h-3 bg-slate-300"></div>
-                <button onclick="openEditDrawer(${product.id})" class="text-blue-600 hover:text-blue-700 text-xs transition-colors">编辑</button>
-                <button onclick="openDeleteModal(${product.id})" class="text-blue-600 hover:text-blue-700 text-xs transition-colors">删除</button>
-              </div>
-            </td>
+            <td class="py-4 px-5"><input type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 border-slate-300 rounded" data-id="${p.id}" ${selectedIds.includes(p.id) ? 'checked' : ''} onchange="toggleRowSelect(${p.id})"></td>
+            <td class="py-4 px-5"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-slate-100 rounded-lg flex items-center justify-center text-lg cursor-pointer hover:bg-slate-200" onclick="openDetailModal(${p.id})">${p.image}</div><div class="min-w-0"><div class="font-medium text-slate-900 truncate max-w-[200px]">${p.name}</div><div class="text-xs text-slate-400 truncate">${p.desc || '暂无描述'}</div></div></div></td>
+            <td class="py-4 px-5 text-slate-600">${CATEGORY_MAP[p.category]}</td>
+            <td class="py-4 px-5"><div class="flex items-center"><span class="font-medium text-slate-900">¥${p.price}</span>${discount}</div>${p.priceHistory.length > 0 ? `<button onclick="openPriceHistoryModal(${p.id})" class="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 mt-0.5"><i data-lucide="history" class="w-3 h-3"></i>查看历史</button>` : ''}</td>
+            <td class="py-4 px-5"><span class="${p.stock === 0 ? 'text-red-500' : p.stock < 10 ? 'text-amber-500' : 'text-slate-600'}">${p.stock}</span>${stockWarning}</td>
+            <td class="py-4 px-5"><span class="px-2 py-1 rounded text-xs font-medium ${statusInfo.class}">${statusInfo.text}</span></td>
+            <td class="py-4 px-5 text-slate-600">${p.sales}</td>
+            <td class="py-4 px-5 text-right"><div class="flex items-center justify-end gap-2"><button onclick="openDetailModal(${p.id})" class="text-xs px-2 py-1 rounded text-slate-600 hover:bg-slate-100 transition-colors">详情</button><div class="w-px h-3 bg-slate-300"></div><button onclick="toggleStatus(${p.id})" class="text-xs px-2 py-1 rounded transition-colors ${p.status === 'active' ? 'text-amber-600 hover:bg-amber-50' : 'text-green-600 hover:bg-green-50'}">${p.status === 'active' ? '下架' : '上架'}</button><div class="w-px h-3 bg-slate-300"></div><button onclick="openEditDrawer(${p.id})" class="text-blue-600 hover:text-blue-700 text-xs transition-colors">编辑</button><button onclick="copyProductDirect(${p.id})" class="text-blue-600 hover:text-blue-700 text-xs transition-colors">复制</button></div></td>
           `;
           tbody.appendChild(tr);
         });
       }
-
       lucide.createIcons();
     }
 
-    window.onload = () => renderTable();
+    function copyProductDirect(id) {
+      const p = PRODUCTS.find(p => p.id === id);
+      if (!p) return;
+      const newId = Math.max(...PRODUCTS.map(p => p.id)) + 1;
+      PRODUCTS.unshift({ ...p, id: newId, name: p.name + ' (复制)', sales: 0, status: 'draft', priceHistory: [] });
+      applyFilters();
+      showToast('商品已复制', 'success');
+    }
+
+    window.onload = () => { renderTable(); checkStockWarning(); };
   </script>
 </body>
 </html>
