@@ -237,6 +237,8 @@ npm install page-agent
 - 按钮圆角：`rounded-md`
 - 卡片圆角：`rounded-xl`
 - 导航图标：`strokeWidth={2.5}`
+- Checkbox/Radio：`accent-blue-700 border-slate-200`
+- 默认边框：`border-slate-200`
 
 完整 token、语义色、CSS 变量、反例：详见 [tokens.md](references/tokens.md)
 

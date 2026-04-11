@@ -423,7 +423,47 @@ bg-slate-50         → 悬停状态、微妙背景
 - ❌ 卡片或面板使用阴影
 - ❌ 导航使用阴影
 
+---
+
+## Form Controls 表单控件颜色
+
+Tailwind CSS v4 使用 `accent-*` 类设置 checkbox/radio 的选中颜色：
+
+| 控件类型 | Tailwind Class | CSS 变量 |
+|----------|----------------|----------|
+| Checkbox | `accent-blue-700` | `--color-blue-700` (主题色) |
+| Radio | `accent-blue-700` | `--color-blue-700` (主题色) |
+| Range | `accent-blue-700` | `--color-blue-700` (主题色) |
+
+**正确用法**：
+```html
+<!-- ✅ 正确：使用 accent-blue-700（主题色） + border-slate-200（默认边框） -->
+<input type="checkbox" class="w-4 h-4 accent-blue-700 border-slate-200 rounded cursor-pointer">
+<input type="radio" class="w-4 h-4 accent-blue-700 border-slate-200 cursor-pointer">
+
+<!-- ❌ 错误：边框太深 -->
+<input type="checkbox" class="w-4 h-4 border-slate-300">
+
+<!-- ❌ 错误：使用非主题色 -->
+<input type="checkbox" class="w-4 h-4 accent-blue-600">
+```
+
+**规则**：
+- Checkbox/Radio 选中颜色使用 `accent-blue-700`（**主题色**）
+- 边框使用 `border-slate-200`（默认边框色，更柔和）
+- 添加 `cursor-pointer` 提升交互体验
+- 添加 `cursor-pointer` 提升交互体验
+- 边框使用 `border-slate-300`
+
+---
+
 ### Surfaces
 - ❌ 蓝色品牌大面积页面背景（应使用 `bg-slate-50`）
 - ❌ 内容直接放在画布上（应包裹在 `bg-white` 卡片内）
 - ❌ 在已有表面色对比的地方再加边框
+
+### Form Controls
+- ❌ Checkbox/Radio 使用 `text-*` 设置颜色（应使用 `accent-*`）
+- ❌ Checkbox/Radio 使用非主题色（应使用 `accent-blue-700`）
+- ❌ 边框使用 `border-slate-300`（太深，应使用 `border-slate-200`）
+- ❌ 缺少 `cursor-pointer` 导致点击无视觉反馈

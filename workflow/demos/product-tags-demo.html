@@ -366,11 +366,11 @@
     </div>
 
     <div class="flex flex-col gap-1 px-2">
-      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+      <a href="dashboard-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
         <i data-lucide="home" class="w-4 h-4 shrink-0"></i>
         <span class="text-[13px] font-medium">首页</span>
       </a>
-      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg bg-blue-600 text-white transition-colors whitespace-nowrap overflow-hidden shadow-md shadow-blue-900/50">
+      <a href="product-list-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg bg-blue-600 text-white transition-colors whitespace-nowrap overflow-hidden shadow-md shadow-blue-900/50">
         <i data-lucide="package" class="w-4 h-4 shrink-0"></i>
         <span class="text-[13px] font-medium">商品</span>
       </a>
@@ -408,7 +408,7 @@
     <!-- 顶部固定面包屑报头 -->
     <header class="bg-white px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
       <div class="flex items-center gap-2">
-        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">首页</a>
+        <a href="dashboard-demo.html" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">首页</a>
         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
         <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">商品管理</a>
         <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
@@ -495,7 +495,7 @@
           <thead>
             <tr class="bg-slate-50/80 text-slate-500 text-[13px]">
               <th class="py-3 px-5 font-semibold border-b border-slate-100 w-10">
-                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                <input type="checkbox" id="selectAll" onchange="toggleSelectAll()" class="w-4 h-4 accent-blue-700 border-slate-200 rounded cursor-pointer">
               </th>
               <th class="py-3 px-5 font-semibold border-b border-slate-100 w-1/3">标签组名称</th>
               <th class="py-3 px-5 font-semibold border-b border-slate-100">标签类型</th>
@@ -1075,7 +1075,7 @@
           tr.className = 'border-b border-slate-100 hover:bg-slate-50/70 transition-colors group';
           tr.innerHTML = `
             <td class="py-4 px-5">
-              <input type="checkbox" class="row-checkbox w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500" data-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="toggleRowSelect(${item.id})">
+              <input type="checkbox" class="row-checkbox w-4 h-4 accent-blue-700 border-slate-200 rounded cursor-pointer" data-id="${item.id}" ${isSelected ? 'checked' : ''} onchange="toggleRowSelect(${item.id})">
             </td>
             <td class="py-4 px-5 font-medium text-slate-900">${item.name}</td>
             <td class="py-4 px-5">${typeBadge}</td>
