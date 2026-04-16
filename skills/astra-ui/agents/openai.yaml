@@ -1,0 +1,4 @@
+interface:
+  display_name: "Astra UI"
+  short_description: "Create and validate Astra SaaS UI"
+  default_prompt: "Use $astra-ui to create or review an Astra-compliant SaaS dashboard, settings page, or data-management interface."

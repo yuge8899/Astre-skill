@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SCRM 数据概览 - Astra UI 原型</title>
+
+  <!-- Tailwind CSS v4.1.6 CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Astra UI Design Tokens -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          spacing: {
+            '5': '1.25rem',  /* 20px - Astra 页面边距 */
+          },
+          borderRadius: {
+            'md': '0.5rem',   /* 8px - Astra 按钮/输入框圆角 */
+            'xl': '1rem',     /* 16px - Astra 卡片圆角 */
+          },
+          fontSize: {
+            '2xl': '1.5rem',  /* 24px - Astra 页面标题 */
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- 引入官方中英文字体库 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    /* 简易图表动画 */
+    .chart-bar {
+      animation: growBar 0.5s ease-out forwards;
+      transform-origin: bottom;
+    }
+    @keyframes growBar {
+      from { transform: scaleY(0); }
+      to { transform: scaleY(1); }
+    }
+    .stat-number {
+      animation: fadeInUp 0.3s ease-out forwards;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    /* 进度环动画 */
+    .progress-ring {
+      animation: drawRing 1s ease-out forwards;
+    }
+    @keyframes drawRing {
+      from { stroke-dashoffset: 100; }
+      to { stroke-dashoffset: 0; }
+    }
+  </style>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-900 bg-slate-50">
+
+  <!-- ==================== Toast 提示 ==================== -->
+  <div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-5 py-3 rounded-xl shadow-lg shadow-slate-900/10 text-sm z-[100] flex items-center gap-2 transition-all duration-300 opacity-0 pointer-events-none translate-y-[-10px]">
+    <i data-lucide="info" class="w-4 h-4 text-blue-400"></i>
+    <span id="toast-msg">提示消息</span>
+  </div>
+
+  <!-- ==================== 一级导航 - PrimaryNav ==================== -->
+  <nav class="w-[110px] bg-slate-900 flex flex-col pt-6 shrink-0 z-20">
+    <div class="px-3 mb-8 flex justify-center">
+      <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold shadow-sm">A</div>
+    </div>
+
+    <div class="flex flex-col gap-1 px-2">
+      <a href="dashboard-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="home" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">首页</span>
+      </a>
+      <a href="product-list-demo.html" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="package" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">商品</span>
+      </a>
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="shopping-cart" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">订单</span>
+      </a>
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg bg-blue-600 text-white transition-colors whitespace-nowrap overflow-hidden shadow-md shadow-blue-900/50">
+        <i data-lucide="users" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">SCRM</span>
+      </a>
+    </div>
+
+    <div class="mt-auto mb-6 px-2">
+      <a href="#" class="flex items-center gap-2 px-3 py-3 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-colors whitespace-nowrap overflow-hidden">
+        <i data-lucide="settings" class="w-4 h-4 shrink-0"></i>
+        <span class="text-[13px] font-medium">设置</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- ==================== 二级导航 - SecondaryNav ==================== -->
+  <nav class="w-[130px] bg-white py-6 px-3 shrink-0 z-10 flex flex-col gap-1.5">
+    <div class="px-2 mb-4 text-xs font-semibold text-slate-400 uppercase tracking-wide">客户管理</div>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] bg-blue-50 text-blue-600 font-medium">数据概览</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">客户列表</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">标签管理</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">客户分组</a>
+    <a href="#" class="block px-3 py-2 rounded-md text-[13px] text-slate-600 hover:bg-slate-100 transition-colors">营销活动</a>
+  </nav>
+
+  <!-- ==================== 主内容区 ==================== -->
+  <main class="flex-1 overflow-hidden bg-slate-50 min-w-[900px] flex flex-col">
+
+    <!-- 顶部固定面包屑 -->
+    <header class="bg-white px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-10">
+      <div class="flex items-center gap-2">
+        <a href="dashboard-demo.html" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">首页</a>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+        <a href="#" class="text-slate-500 hover:text-slate-700 text-[13px] transition-colors font-medium">SCRM</a>
+        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+        <span class="text-slate-900 text-[13px] font-semibold">数据概览</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-slate-500">数据更新时间: 2026-04-10 14:30</span>
+        <button onclick="refreshData()" class="px-3 py-1.5 border border-slate-200 text-slate-600 text-xs font-medium rounded-md hover:bg-slate-50 transition-colors flex items-center gap-1">
+          <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+          刷新
+        </button>
+      </div>
+    </header>
+
+    <!-- 内部滚动安全区 -->
+    <div class="flex-1 overflow-y-auto p-5 flex flex-col">
+
+    <!-- 功能说明头部模块 -->
+    <div class="bg-white rounded-xl p-5 mb-5 shrink-0">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+          <i data-lucide="bar-chart-3" class="w-6 h-6" stroke-width="2.5"></i>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-1.5">
+            <h1 class="text-[20px] font-bold text-slate-900 leading-none">数据概览</h1>
+            <span class="bg-green-50 text-green-600 px-2 py-0.5 rounded text-xs font-medium">实时</span>
+          </div>
+          <p class="text-[13px] text-slate-500 leading-relaxed max-w-4xl">
+            全面呈现客户数据洞察，包括客户总量、活跃度、转化率、营销效果等关键指标，助力精准决策。
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 数据概览卡片组 ==================== -->
+    <div class="grid grid-cols-4 gap-5 mb-5 shrink-0">
+      <!-- 总客户数 -->
+      <div class="bg-white rounded-xl p-5 hover:shadow-sm transition-shadow cursor-pointer group" onclick="showToast('查看客户详情')">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <i data-lucide="users" class="w-5 h-5"></i>
+          </div>
+          <span class="text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">+12.5%</span>
+        </div>
+        <div class="stat-number">
+          <div class="text-2xl font-bold text-slate-900 mb-1">24,580</div>
+          <div class="text-xs text-slate-500">总客户数</div>
+        </div>
+        <div class="mt-3 flex items-center gap-1 text-xs text-slate-400 group-hover:text-blue-600 transition-colors">
+          <span>较上月 +1,234</span>
+          <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </div>
+      </div>
+
+      <!-- 活跃客户 -->
+      <div class="bg-white rounded-xl p-5 hover:shadow-sm transition-shadow cursor-pointer group" onclick="showToast('查看活跃客户分析')">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+            <i data-lucide="user-check" class="w-5 h-5"></i>
+          </div>
+          <span class="text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">+8.3%</span>
+        </div>
+        <div class="stat-number">
+          <div class="text-2xl font-bold text-slate-900 mb-1">18,420</div>
+          <div class="text-xs text-slate-500">活跃客户</div>
+        </div>
+        <div class="mt-3 flex items-center gap-1 text-xs text-slate-400 group-hover:text-blue-600 transition-colors">
+          <span>活跃率 75.2%</span>
+          <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </div>
+      </div>
+
+      <!-- 新增客户 -->
+      <div class="bg-white rounded-xl p-5 hover:shadow-sm transition-shadow cursor-pointer group" onclick="showToast('查看新增趋势')">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+          </div>
+          <span class="text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded font-medium">+23.1%</span>
+        </div>
+        <div class="stat-number">
+          <div class="text-2xl font-bold text-slate-900 mb-1">1,234</div>
+          <div class="text-xs text-slate-500">本月新增</div>
+        </div>
+        <div class="mt-3 flex items-center gap-1 text-xs text-slate-400 group-hover:text-blue-600 transition-colors">
+          <span>日均新增 41</span>
+          <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </div>
+      </div>
+
+      <!-- 转化率 -->
+      <div class="bg-white rounded-xl p-5 hover:shadow-sm transition-shadow cursor-pointer group" onclick="showToast('查看转化详情')">
+        <div class="flex items-center justify-between mb-3">
+          <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+            <i data-lucide="target" class="w-5 h-5"></i>
+          </div>
+          <span class="text-xs text-red-600 bg-red-50 px-1.5 py-0.5 rounded font-medium">-2.1%</span>
+        </div>
+        <div class="stat-number">
+          <div class="text-2xl font-bold text-slate-900 mb-1">32.8%</div>
+          <div class="text-xs text-slate-500">转化率</div>
+        </div>
+        <div class="mt-3 flex items-center gap-1 text-xs text-slate-400 group-hover:text-blue-600 transition-colors">
+          <span>目标 35%</span>
+          <i data-lucide="arrow-up-right" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 图表区域 ==================== -->
+    <div class="grid grid-cols-3 gap-5 mb-5 shrink-0">
+
+      <!-- 客户增长趋势图 -->
+      <div class="col-span-2 bg-white rounded-xl p-5">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold text-slate-900">客户增长趋势</h2>
+            <p class="text-xs text-slate-500 mt-0.5">近12个月新增客户数据</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button class="px-3 py-1.5 bg-blue-50 text-blue-600 text-xs font-medium rounded-md">月度</button>
+            <button class="px-3 py-1.5 text-slate-500 text-xs font-medium rounded-md hover:bg-slate-50 transition-colors">周度</button>
+            <button class="px-3 py-1.5 text-slate-500 text-xs font-medium rounded-md hover:bg-slate-50 transition-colors">日度</button>
+          </div>
+        </div>
+
+        <!-- 简易柱状图 -->
+        <div class="h-[200px] flex items-end gap-3 px-2">
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-100 rounded-t chart-bar" style="height: 45%"></div>
+            <span class="text-xs text-slate-400">1月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-100 rounded-t chart-bar" style="height: 52%"></div>
+            <span class="text-xs text-slate-400">2月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-100 rounded-t chart-bar" style="height: 38%"></div>
+            <span class="text-xs text-slate-400">3月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-100 rounded-t chart-bar" style="height: 65%"></div>
+            <span class="text-xs text-slate-400">4月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-100 rounded-t chart-bar" style="height: 72%"></div>
+            <span class="text-xs text-slate-400">5月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-100 rounded-t chart-bar" style="height: 58%"></div>
+            <span class="text-xs text-slate-400">6月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-200 rounded-t chart-bar" style="height: 85%"></div>
+            <span class="text-xs text-slate-400">7月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-200 rounded-t chart-bar" style="height: 78%"></div>
+            <span class="text-xs text-slate-400">8月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-300 rounded-t chart-bar" style="height: 92%"></div>
+            <span class="text-xs text-slate-400">9月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-400 rounded-t chart-bar" style="height: 88%"></div>
+            <span class="text-xs text-slate-400">10月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-500 rounded-t chart-bar" style="height: 95%"></div>
+            <span class="text-xs text-slate-400">11月</span>
+          </div>
+          <div class="flex-1 flex flex-col items-center gap-1">
+            <div class="w-full bg-blue-600 rounded-t chart-bar" style="height: 100%"></div>
+            <span class="text-xs text-slate-500 font-medium">12月</span>
+          </div>
+        </div>
+
+        <!-- 图表底部信息 -->
+        <div class="mt-4 flex items-center justify-between text-xs text-slate-500">
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-1.5">
+              <div class="w-2.5 h-2.5 rounded bg-blue-600"></div>
+              <span>新增客户</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <div class="w-2.5 h-2.5 rounded bg-blue-100"></div>
+              <span>历史均值</span>
+            </div>
+          </div>
+          <div>峰值: <span class="font-medium text-slate-700">1,456</span> (12月)</div>
+        </div>
+      </div>
+
+      <!-- 客户来源分布 -->
+      <div class="bg-white rounded-xl p-5">
+        <div class="mb-5">
+          <h2 class="text-base font-semibold text-slate-900">客户来源</h2>
+          <p class="text-xs text-slate-500 mt-0.5">本月新增客户渠道分布</p>
+        </div>
+
+        <!-- 简易环形图 -->
+        <div class="relative w-[140px] h-[140px] mx-auto mb-4">
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#e2e8f0" stroke-width="12"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="12" stroke-dasharray="100" stroke-dashoffset="35" class="progress-ring"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="100" stroke-dashoffset="65" class="progress-ring"/>
+            <circle cx="50" cy="50" r="40" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="100" stroke-dashoffset="85" class="progress-ring"/>
+          </svg>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="text-center">
+              <div class="text-lg font-bold text-slate-900">1,234</div>
+              <div class="text-xs text-slate-500">总计</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 来源列表 -->
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded bg-blue-500"></div>
+              <span class="text-xs text-slate-600">自然流量</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-900">35%</span>
+              <span class="text-xs text-slate-400">432</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded bg-green-500"></div>
+              <span class="text-xs text-slate-600">广告投放</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-900">25%</span>
+              <span class="text-xs text-slate-400">308</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded bg-amber-500"></div>
+              <span class="text-xs text-slate-600">社交分享</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-900">15%</span>
+              <span class="text-xs text-slate-400">185</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-2.5 h-2.5 rounded bg-slate-300"></div>
+              <span class="text-xs text-slate-600">其他渠道</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-medium text-slate-900">25%</span>
+              <span class="text-xs text-slate-400">309</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== 底部分析模块 ==================== -->
+    <div class="grid grid-cols-2 gap-5 shrink-0">
+
+      <!-- 客户活跃度分析 -->
+      <div class="bg-white rounded-xl p-5">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold text-slate-900">客户活跃度分布</h2>
+            <p class="text-xs text-slate-500 mt-0.5">按最近互动时间统计</p>
+          </div>
+          <select class="bg-slate-50 border border-slate-200 rounded-md px-2 py-1 text-xs outline-none focus:border-blue-500 text-slate-700">
+            <option>本月</option>
+            <option>本季度</option>
+            <option>本年</option>
+          </select>
+        </div>
+
+        <!-- 活跃度条形图 -->
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-20 text-xs text-slate-500">高活跃</div>
+            <div class="flex-1 h-6 bg-slate-100 rounded-md overflow-hidden">
+              <div class="h-full bg-green-500 rounded-md chart-bar" style="width: 42%"></div>
+            </div>
+            <div class="w-24 text-right">
+              <span class="text-sm font-medium text-slate-900">42%</span>
+              <span class="text-xs text-slate-400 ml-1">10,320</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-20 text-xs text-slate-500">中活跃</div>
+            <div class="flex-1 h-6 bg-slate-100 rounded-md overflow-hidden">
+              <div class="h-full bg-blue-500 rounded-md chart-bar" style="width: 33%"></div>
+            </div>
+            <div class="w-24 text-right">
+              <span class="text-sm font-medium text-slate-900">33%</span>
+              <span class="text-xs text-slate-400 ml-1">8,110</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-20 text-xs text-slate-500">低活跃</div>
+            <div class="flex-1 h-6 bg-slate-100 rounded-md overflow-hidden">
+              <div class="h-full bg-amber-500 rounded-md chart-bar" style="width: 18%"></div>
+            </div>
+            <div class="w-24 text-right">
+              <span class="text-sm font-medium text-slate-900">18%</span>
+              <span class="text-xs text-slate-400 ml-1">4,424</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="w-20 text-xs text-slate-500">沉睡</div>
+            <div class="flex-1 h-6 bg-slate-100 rounded-md overflow-hidden">
+              <div class="h-full bg-slate-300 rounded-md chart-bar" style="width: 7%"></div>
+            </div>
+            <div class="w-24 text-right">
+              <span class="text-sm font-medium text-slate-900">7%</span>
+              <span class="text-xs text-slate-400 ml-1">1,726</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 活跃度说明 -->
+        <div class="mt-5 pt-4 border-t border-slate-100 flex items-center gap-4 text-xs text-slate-500">
+          <div class="flex items-center gap-1">
+            <i data-lucide="info" class="w-3 h-3"></i>
+            <span>高活跃: 7日内有互动</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span>沉睡: 30日无互动</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 营销活动效果 -->
+      <div class="bg-white rounded-xl p-5">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-base font-semibold text-slate-900">营销活动效果</h2>
+            <p class="text-xs text-slate-500 mt-0.5">本月进行中的活动数据</p>
+          </div>
+          <button onclick="showToast('查看全部活动')" class="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1">
+            查看全部
+            <i data-lucide="arrow-right" class="w-3 h-3"></i>
+          </button>
+        </div>
+
+        <!-- 活动列表 -->
+        <div class="flex flex-col gap-4">
+          <div class="flex items-center gap-4 p-3 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer" onclick="showToast('查看618大促详情')">
+            <div class="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center shrink-0">
+              <i data-lucide="gift" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm font-medium text-slate-900 truncate">618年中大促</span>
+                <span class="bg-red-50 text-red-500 px-1.5 py-0.5 rounded text-xs">进行中</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs text-slate-500">
+                <span>触达 5,234 人</span>
+                <span class="text-green-600">转化 18.5%</span>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-sm font-medium text-slate-900">967</div>
+              <div class="text-xs text-slate-400">新增客户</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 p-3 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer" onclick="showToast('查看会员日活动详情')">
+            <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-500 flex items-center justify-center shrink-0">
+              <i data-lucide="crown" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm font-medium text-slate-900 truncate">会员专属日</span>
+                <span class="bg-purple-50 text-purple-500 px-1.5 py-0.5 rounded text-xs">进行中</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs text-slate-500">
+                <span>触达 3,420 人</span>
+                <span class="text-green-600">转化 22.1%</span>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-sm font-medium text-slate-900">756</div>
+              <div class="text-xs text-slate-400">新增客户</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 p-3 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer" onclick="showToast('查看新品推广详情')">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-500 flex items-center justify-center shrink-0">
+              <i data-lucide="sparkles" class="w-5 h-5"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-sm font-medium text-slate-900 truncate">新品首发推广</span>
+                <span class="bg-green-50 text-green-500 px-1.5 py-0.5 rounded text-xs">已完成</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs text-slate-500">
+                <span>触达 2,180 人</span>
+                <span class="text-green-600">转化 15.3%</span>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="text-sm font-medium text-slate-900">333</div>
+              <div class="text-xs text-slate-400">新增客户</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 效果汇总 -->
+        <div class="mt-5 pt-4 border-t border-slate-100 grid grid-cols-3 gap-4">
+          <div class="text-center">
+            <div class="text-sm font-medium text-slate-900">2,056</div>
+            <div class="text-xs text-slate-500">活动新增</div>
+          </div>
+          <div class="text-center">
+            <div class="text-sm font-medium text-slate-900">18.6%</div>
+            <div class="text-xs text-slate-500">平均转化</div>
+          </div>
+          <div class="text-center">
+            <div class="text-sm font-medium text-green-600">+35.2%</div>
+            <div class="text-xs text-slate-500">较上月</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    // 初始化图标
+    lucide.createIcons({ attrs: { 'stroke-width': 2.5 } });
+
+    // Toast 提示
+    let toastTimeout;
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const msg = document.getElementById('toast-msg');
+      const icon = toast.querySelector('i');
+
+      msg.textContent = message;
+
+      if (type === 'error') {
+        icon.setAttribute('data-lucide', 'x-circle');
+        icon.className = 'w-4 h-4 text-red-400';
+      } else if (type === 'success') {
+        icon.setAttribute('data-lucide', 'check-circle');
+        icon.className = 'w-4 h-4 text-green-400';
+      } else {
+        icon.setAttribute('data-lucide', 'info');
+        icon.className = 'w-4 h-4 text-blue-400';
+      }
+      lucide.createIcons();
+
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-10px]');
+      toast.classList.add('opacity-100', 'translate-y-0');
+
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-10px]');
+      }, 3000);
+    }
+
+    // 刷新数据
+    function refreshData() {
+      showToast('数据刷新中...', 'info');
+      setTimeout(() => {
+        showToast('数据已更新至最新', 'success');
+      }, 1000);
+    }
+  </script>
+</body>
+</html>
