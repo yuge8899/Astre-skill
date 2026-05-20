@@ -4,12 +4,13 @@ Astra UI Design System skill pack for generating UI pages that conform to Astra 
 
 ## Current Version
 
-**v1.9.1** - Gate Contract / Component mapping migrated to references + gate scripts aligned
+**v1.9.2** - Synced astra-ui skill package from local workspace
 
 ## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v1.9.2 | 2026-05-20 | Synced `skills/astra-ui` skill package from local workspace and recorded release update |
 | v1.9.1 | 2026-04-11 | Migrated Gate Contract and shadcn/ui component mapping to `references/`; synced SYSTEM_GUIDE, gate scripts, and tests |
 | v1.9.0 | 2026-04-11 | Added Checkbox/Radio and default border token rules; synced 4 HTML demos; added screenshot preview links to README |
 | v1.8.0 | 2026-04-10 | shadcn/ui component mapping + page-agent automated testing + icon hard rules |

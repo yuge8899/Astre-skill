@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v1.9.2] - 2026-05-20
+
+### Changed
+
+- Synced `skills/astra-ui` skill package from the local workspace.
+- Updated README current version and version history for this release.
+
 ## [v1.9.1] - 2026-04-11
 
 ### Changed
